@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
   return Response.json(
     {
-      message: `Create account failed.`,
+      message: "Create account failed.",
     },
     { status: 500 }
   );
