@@ -10,16 +10,22 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface PageWrapperProps {
   children: ReactNode;
+  className?: string;
   breadcrumb: {
     label: string;
     href: string;
   }[];
 }
 
-export function PageWrapper({ children, breadcrumb }: PageWrapperProps) {
+export function PageWrapper({
+  children,
+  className,
+  breadcrumb,
+}: PageWrapperProps) {
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b">
@@ -48,7 +54,7 @@ export function PageWrapper({ children, breadcrumb }: PageWrapperProps) {
           </Breadcrumb>
         </div>
       </header>
-      <main className="w-full p-4">{children}</main>
+      <main className={cn("w-full p-4", className)}>{children}</main>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
+import { Toaster } from "@/components/ui/sonner";
 import { ClerkAuthProvider, ReactQueryProvider } from "@/lib/providers";
 import "./globals.css";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ReactQueryProvider>{children}</ReactQueryProvider>
+          <Toaster richColors position="top-center" />
         </body>
       </html>
     </ClerkAuthProvider>
