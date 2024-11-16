@@ -29,7 +29,7 @@ export default function RootLayout({
     <ClerkAuthProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased my-0 mx-auto min-h-full max-w-screen-sm`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </body>

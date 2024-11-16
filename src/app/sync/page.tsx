@@ -1,14 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 
 import { syncAuth } from "@/services/auth";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function Syncpage() {
-  const router = useRouter();
-
   const { data } = useQuery({
     queryKey: ["sync"],
     queryFn: syncAuth,
@@ -17,16 +15,16 @@ export default function Syncpage() {
   if (data) {
     switch (data?.status) {
       case 201:
-        router.push("/dashboard");
+        redirect("/dashboard");
         break;
       case 401:
-        router.push("/sign-in");
+        redirect("/sign-in");
         break;
       case 409:
-        router.push("/dashboard");
+        redirect("/dashboard");
         break;
       default:
-        router.push("/sign-up");
+        redirect("/sign-up");
     }
   }
 
