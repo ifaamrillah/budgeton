@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+
+import { ClerkAuthProvider, ReactQueryProvider } from "@/lib/providers";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -24,12 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkAuthProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased my-0 mx-auto min-h-full max-w-screen-sm`}
+        >
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </body>
+      </html>
+    </ClerkAuthProvider>
   );
 }
