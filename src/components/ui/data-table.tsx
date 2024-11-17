@@ -1,0 +1,175 @@
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ChevronsUpDown } from "lucide-react";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Paginator from "@/components/ui/paginator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+
+interface DataTableProps {
+  data: any[];
+  columns: ColumnDef<any>[];
+  totalData: number;
+  pagination: PaginationState;
+  setPagination: OnChangeFn<PaginationState>;
+  sorting: SortingState;
+  setSorting: OnChangeFn<SortingState>;
+}
+
+export const DataTable = ({
+  data,
+  columns,
+  totalData,
+  pagination,
+  setPagination,
+  sorting,
+  setSorting,
+}: DataTableProps) => {
+  const table = useReactTable({
+    data: data,
+    columns: columns,
+    rowCount: totalData,
+    state: {
+      sorting,
+      pagination,
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
+    manualPagination: true,
+  });
+
+  return (
+    <div className="w-full">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const sortButton = (
+                    <Button
+                      variant="text"
+                      className="p-0"
+                      onClick={() =>
+                        header.column.toggleSorting(
+                          header.column.getIsSorted() === "asc"
+                        )
+                      }
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                      <ChevronsUpDown className="ml-1 size-2" />
+                    </Button>
+                  );
+
+                  return (
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        minWidth: header.column.columnDef.size,
+                        maxWidth: header.column.columnDef.size,
+                      }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : header.column.columnDef.enableSorting
+                        ? sortButton
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        minWidth: cell.column.columnDef.size,
+                        maxWidth: cell.column.columnDef.size,
+                      }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns?.length} className="h-24 flex-auto">
+                  <div className="flex justify-center">No results</div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <Select
+          value={pagination.pageSize.toString()}
+          onValueChange={(value) =>
+            setPagination({ ...pagination, pageSize: parseInt(value) })
+          }
+        >
+          <SelectTrigger className="w-[60px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="30">30</SelectItem>
+            <SelectItem value="40">40</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="flex justify-end">
+          <Paginator
+            currentPage={table.getState().pagination.pageIndex}
+            totalPages={table.getPageCount()}
+            onPageChange={(pageNumber) => table.setPageIndex(pageNumber)}
+            showPreviousNext
+          />
+        </div>
+      </div>
+    </div>
+  );
+};

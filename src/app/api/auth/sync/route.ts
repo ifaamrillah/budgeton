@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
+import { FREE_PLAN_DURATION } from "@/lib/constants";
 
 export async function GET() {
   const user = await currentUser();
@@ -22,13 +23,13 @@ export async function GET() {
   if (existingUser) {
     return Response.json(
       {
-        message: `User with email: ${user.emailAddresses[0].emailAddress} not found.`,
+        message: `User already exists. Please login instead.`,
       },
-      { status: 404 }
+      { status: 409 }
     );
   }
 
-  const expiredPlan = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); //15 days
+  const expiredPlan = new Date(Date.now() + FREE_PLAN_DURATION); //15 days
 
   const create = await db.user.create({
     data: {

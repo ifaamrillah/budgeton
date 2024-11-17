@@ -143,8 +143,9 @@ const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
 };
 
 const CredenzaBody = ({ className, children, ...props }: CredenzaProps) => {
+  const { isDesktop } = useMediaQuery();
   return (
-    <div className={cn("px-4 lg:px-0", className)} {...props}>
+    <div className={cn(isDesktop ? "px-0" : "px-4", className)} {...props}>
       {children}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +33,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
-export default function AddAccountButton() {
+export function AddAccountButton() {
+  const queryClient = useQueryClient();
   const [isOpen, setOpen] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof CreateAccountValidator>>({
@@ -54,6 +55,7 @@ export default function AddAccountButton() {
       toast.error("Create account failed");
     },
     onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-all-account"] });
       setOpen(false);
     },
   });
