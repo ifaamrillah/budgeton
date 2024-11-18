@@ -1,24 +1,36 @@
-import { z } from "zod";
+import { TypeAccountValidator } from "@/validator/account-validator";
+import { apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
 
-import { CreateAccountValidator } from "@/validator/account-validator";
-import { apiRequest } from "@/lib/api";
-
-export async function createAccount(
-  values: z.infer<typeof CreateAccountValidator>
-) {
-  const res = await apiRequest({
-    method: "POST",
-    url: "/api/account/create",
-    data: values,
+export async function getAllAccount(params?: Record<string, unknown>) {
+  const res = await apiGet({
+    url: "/account",
+    params,
   });
   return res;
 }
 
-export async function getAllAccount(params?: Record<string, unknown>) {
-  const res = await apiRequest({
-    method: "GET",
-    url: "/api/account",
-    params,
+export async function getAccountById(id?: string) {
+  const res = await apiGet({
+    url: `/account/${id}`,
+  });
+  return res;
+}
+
+export async function createAccount(data: TypeAccountValidator) {
+  const res = await apiPost({
+    url: "/account",
+    data,
+  });
+  return res;
+}
+
+export async function updateAccountById(
+  id: string,
+  data: TypeAccountValidator
+) {
+  const res = await apiPatch({
+    url: `/account/${id}`,
+    data,
   });
   return res;
 }
