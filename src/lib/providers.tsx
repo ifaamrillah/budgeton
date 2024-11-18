@@ -13,7 +13,13 @@ export function ClerkAuthProvider({ children }: ProviderProps) {
 }
 
 export function ReactQueryProvider({ children }: ProviderProps) {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
