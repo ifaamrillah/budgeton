@@ -1,12 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  ChevronsUpDown,
-  MoreHorizontal,
-  SquarePen,
-  Trash2,
-} from "lucide-react";
+import { Settings, SquarePen, Trash2 } from "lucide-react";
+import { Account } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,20 +13,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export type Account = {
-  id: string;
-  name: string;
-  startingBalance: string;
-  status: boolean;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { AccountModal } from "./account-modal";
 
 export const accountColumns: ColumnDef<Account>[] = [
   {
-    accessorKey: "",
+    accessorKey: "id",
     header: "No",
     size: 20,
     cell: ({ row }) => row.index + 1,
@@ -42,7 +30,6 @@ export const accountColumns: ColumnDef<Account>[] = [
   {
     accessorKey: "startingBalance",
     header: "Starting balance",
-    enableSorting: true,
     size: 90,
     cell: ({ row }) => {
       const startingBalance = parseFloat(row.getValue("startingBalance"));
@@ -71,25 +58,37 @@ export const accountColumns: ColumnDef<Account>[] = [
     id: "actions",
     header: "Action",
     size: 20,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="size-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <SquarePen className="size-4" /> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-500">
-              <Trash2 className="size-4" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
   },
 ];
+
+const ActionButton = ({ id }: { id: string }) => {
+  const [isModalOpen, setOpenModal] = useState<boolean>(false);
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="size-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <Settings className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => setOpenModal(true)}
+            className="cursor-pointer"
+          >
+            <SquarePen className="size-4" /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-red-500 cursor-pointer">
+            <Trash2 className="size-4" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {isModalOpen && (
+        <AccountModal id={id} isOpen={isModalOpen} setOpen={setOpenModal} />
+      )}
+    </>
+  );
+};
