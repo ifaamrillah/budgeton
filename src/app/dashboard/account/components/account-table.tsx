@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PaginationState, SortingState } from "@tanstack/react-table";
+import { PlusCircle } from "lucide-react";
 
 import { getAllAccount } from "@/services/account";
 
 import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
 import { accountColumns } from "./account-columns";
-import { AddAccountButton } from "./add-account-button";
+import { AccountModal } from "./account-modal";
 
 export const AccountTable = () => {
+  const [isOpenModal, setOpenModal] = useState<boolean>(false);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 1,
     pageSize: 10,
@@ -22,8 +25,8 @@ export const AccountTable = () => {
     },
   ]);
 
-  const { data } = useQuery({
-    queryKey: ["get-all-account", pagination, sorting],
+  const { data, isFetching } = useQuery({
+    queryKey: ["account", pagination, sorting],
     queryFn: () =>
       getAllAccount({
         pagination: {
@@ -40,21 +43,25 @@ export const AccountTable = () => {
   return (
     <>
       <div className="flex justify-end gap-4">
-        <AddAccountButton />
+        <Button onClick={() => setOpenModal(true)}>
+          <PlusCircle /> Add Account
+        </Button>
       </div>
       <div>
-        {data?.data.data && (
-          <DataTable
-            data={data?.data.data}
-            columns={accountColumns}
-            totalData={data?.data.pagination.totalData}
-            pagination={pagination}
-            setPagination={setPagination}
-            sorting={sorting}
-            setSorting={setSorting}
-          />
-        )}
+        <DataTable
+          isLoading={isFetching}
+          data={data?.data}
+          columns={accountColumns}
+          totalData={data?.pagination?.totalData}
+          pagination={pagination}
+          setPagination={setPagination}
+          sorting={sorting}
+          setSorting={setSorting}
+        />
       </div>
+      {isOpenModal && (
+        <AccountModal isOpen={isOpenModal} setOpen={setOpenModal} />
+      )}
     </>
   );
 };
