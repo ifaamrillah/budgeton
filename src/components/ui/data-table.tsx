@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ColumnDef,
   flexRender,
@@ -27,10 +28,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DataTableProps {
-  data: any[];
+  data: Record<string, unknown>[];
   columns: ColumnDef<any>[];
+  isLoading: boolean;
   totalData: number;
   pagination: PaginationState;
   setPagination: OnChangeFn<PaginationState>;
@@ -41,6 +44,7 @@ interface DataTableProps {
 export const DataTable = ({
   data,
   columns,
+  isLoading = false,
   totalData,
   pagination,
   setPagination,
@@ -87,7 +91,6 @@ export const DataTable = ({
                       <ChevronsUpDown className="ml-1 size-2" />
                     </Button>
                   );
-
                   return (
                     <TableHead
                       key={header.id}
@@ -110,8 +113,17 @@ export const DataTable = ({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns?.length} className="h-24 flex-auto">
+                  <div className="flex justify-center items-center">
+                    <Spinner />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -143,33 +155,35 @@ export const DataTable = ({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <Select
-          value={pagination.pageSize.toString()}
-          onValueChange={(value) =>
-            setPagination({ ...pagination, pageSize: parseInt(value) })
-          }
-        >
-          <SelectTrigger className="w-[60px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="30">30</SelectItem>
-            <SelectItem value="40">40</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex justify-end">
-          <Paginator
-            currentPage={table.getState().pagination.pageIndex}
-            totalPages={table.getPageCount()}
-            onPageChange={(pageNumber) => table.setPageIndex(pageNumber)}
-            showPreviousNext
-          />
+      {!isLoading && (
+        <div className="flex items-center justify-between space-x-2 py-4">
+          <Select
+            value={pagination.pageSize.toString()}
+            onValueChange={(value) =>
+              setPagination({ ...pagination, pageSize: parseInt(value) })
+            }
+          >
+            <SelectTrigger className="w-[60px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="30">30</SelectItem>
+              <SelectItem value="40">40</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex justify-end">
+            <Paginator
+              currentPage={table.getState().pagination.pageIndex}
+              totalPages={table.getPageCount()}
+              onPageChange={(pageNumber) => table.setPageIndex(pageNumber)}
+              showPreviousNext
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
