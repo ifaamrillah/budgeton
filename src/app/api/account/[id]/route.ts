@@ -180,3 +180,80 @@ export async function PATCH(
     { status: 500 }
   );
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Check Authorization
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json(
+      { message: "Unauthorized access." },
+      { status: 401 }
+    );
+  }
+
+  // Check Synchronization
+  const existingUser = await db.user.findUnique({
+    where: { id: user.id },
+  });
+  if (!existingUser) {
+    return NextResponse.json(
+      { message: "Users are not synchronized" },
+      { status: 422 }
+    );
+  }
+
+  // Check Expired Plan
+  if (existingUser.expiredPlan && existingUser.plan !== "LIFETIME") {
+    const expiredDate = new Date(existingUser.expiredPlan);
+    const currentDate = new Date();
+    if (expiredDate < currentDate) {
+      return NextResponse.json(
+        { message: "User plan has expired." },
+        { status: 403 }
+      );
+    }
+  }
+
+  // Params
+  const id = (await params).id;
+
+  // Check id is valid
+  const getById = await db.account.findUnique({
+    where: { id },
+  });
+  if (!getById) {
+    return NextResponse.json(
+      {
+        message: `Account with id: "${id}" was not found.`,
+      },
+      { status: 404 }
+    );
+  }
+
+  // Delate Account
+  const deleteAccount = await db.account.delete({
+    where: {
+      id,
+    },
+  });
+  if (deleteAccount) {
+    return NextResponse.json(
+      {
+        message: "delete account successfully.",
+        data: deleteAccount,
+      },
+      { status: 200 }
+    );
+  }
+
+  // Internal Server Error
+  return NextResponse.json(
+    {
+      message: "Edit account failed.",
+    },
+    { status: 500 }
+  );
+}
