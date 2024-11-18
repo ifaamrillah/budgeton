@@ -1,9 +1,8 @@
-import { apiRequest } from "@/lib/api";
+import { apiGet } from "@/lib/axiosClient";
 
 export async function syncAuth() {
-  const res = await apiRequest({
-    method: "GET",
-    url: "/api/auth/sync",
+  const res = await apiGet({
+    url: "auth/sync",
   });
   return res;
 }
