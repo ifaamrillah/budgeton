@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
@@ -6,10 +7,9 @@ import { FREE_PLAN_DURATION } from "@/lib/constants";
 export async function GET() {
   const user = await currentUser();
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       {
-        message:
-          "Unauthorized access. Please check your permissions or log in.",
+        message: "Unauthorized access.",
       },
       { status: 401 }
     );
@@ -21,11 +21,11 @@ export async function GET() {
     },
   });
   if (existingUser) {
-    return Response.json(
+    return NextResponse.json(
       {
-        message: `User already exists. Please login instead.`,
+        message: "User already synchronized.",
       },
-      { status: 409 }
+      { status: 200 }
     );
   }
 
@@ -39,18 +39,18 @@ export async function GET() {
     },
   });
   if (create) {
-    return Response.json(
+    return NextResponse.json(
       {
-        message: "User successfully registered.",
+        message: "User successfully synchronized.",
         data: create,
       },
-      { status: 201 }
+      { status: 200 }
     );
   }
 
-  return Response.json(
+  return NextResponse.json(
     {
-      message: `Create user failed.`,
+      message: "User synchronization failed.",
     },
     { status: 500 }
   );
