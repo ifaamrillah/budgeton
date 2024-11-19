@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import {
   createAccount,
@@ -68,8 +69,8 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
       onSuccess: () => {
         toast.success("Create account successfully.");
       },
-      onError: (err: any) => {
-        toast.error(err?.data?.message || "Create account failed.");
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Create account failed.");
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["account"] });
@@ -84,11 +85,10 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
       onSuccess: () => {
         toast.success("Edit account successfully.");
       },
-      onError: (err: any) => {
-        toast.error(err?.data?.message || "Edit account failed.");
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Edit account failed.");
       },
       onSettled: () => {
-        console.log("ini jalan");
         queryClient.invalidateQueries({ queryKey: ["account"] });
         setOpen(false);
       },

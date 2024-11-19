@@ -72,11 +72,14 @@ export const DataTable = ({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className="bg-zinc-100 font-medium"
+              >
                 {headerGroup.headers.map((header) => {
                   const sortButton = (
                     <Button
-                      variant="text"
+                      variant="blank"
                       className="p-0"
                       onClick={() =>
                         header.column.toggleSorting(
@@ -92,13 +95,7 @@ export const DataTable = ({
                     </Button>
                   );
                   return (
-                    <TableHead
-                      key={header.id}
-                      style={{
-                        minWidth: header.column.columnDef.size,
-                        maxWidth: header.column.columnDef.size,
-                      }}
-                    >
+                    <TableHead key={header.id} className="whitespace-nowrap">
                       {header.isPlaceholder
                         ? null
                         : header.column.columnDef.enableSorting
@@ -113,11 +110,10 @@ export const DataTable = ({
               </TableRow>
             ))}
           </TableHeader>
-
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={columns?.length} className="h-24 flex-auto">
+                <TableCell colSpan={columns?.length} className="h-24">
                   <div className="flex justify-center items-center">
                     <Spinner />
                   </div>
@@ -130,13 +126,7 @@ export const DataTable = ({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        minWidth: cell.column.columnDef.size,
-                        maxWidth: cell.column.columnDef.size,
-                      }}
-                    >
+                    <TableCell key={cell.id} className="whitespace-nowrap">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -147,7 +137,7 @@ export const DataTable = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns?.length} className="h-24 flex-auto">
+                <TableCell colSpan={columns.length} className="h-24 flex-auto">
                   <div className="flex justify-center">No results</div>
                 </TableCell>
               </TableRow>

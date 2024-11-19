@@ -6,6 +6,7 @@ import { Settings, SquarePen, Trash2 } from "lucide-react";
 import { Account } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { deleteAccountById } from "@/services/account";
 
@@ -43,9 +44,62 @@ export const accountColumns: ColumnDef<Account>[] = [
         style: "currency",
         currency: "IDR",
       }).format(startingBalance);
-
       return formatted;
     },
+  },
+  {
+    accessorKey: "start",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "1",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "2",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
+  },
+  {
+    accessorKey: "3",
+    header: "Starting balance",
+    size: 90,
+    cell: ({ row }) => <div>200000</div>,
   },
   {
     accessorKey: "status",
@@ -79,8 +133,8 @@ const ActionButton = ({ id }: { id: string }) => {
       onSuccess: () => {
         toast.success("Delete account successfully.");
       },
-      onError: (err: any) => {
-        toast.error(err?.data?.message || "Delete account failed.");
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Delete account failed.");
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["account"] });
