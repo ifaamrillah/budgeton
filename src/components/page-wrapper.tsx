@@ -19,7 +19,7 @@ interface PageWrapperProps {
   className?: string;
   breadcrumb: {
     label: string;
-    href: string;
+    href?: string;
   }[];
 }
 
@@ -47,7 +47,12 @@ export function PageWrapper({
                 ) : (
                   <Fragment key={index}>
                     <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                      <BreadcrumbLink
+                        href={href}
+                        className={`${!href && "cursor-not-allowed"}`}
+                      >
+                        {label}
+                      </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                   </Fragment>

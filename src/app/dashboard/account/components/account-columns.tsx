@@ -28,7 +28,7 @@ export const accountColumns: ColumnDef<Account>[] = [
     header: "No",
     cell: ({ row }) => row.index + 1,
     meta: {
-      className: "w-[40px]",
+      className: "w-[60px]",
     },
   },
   {
