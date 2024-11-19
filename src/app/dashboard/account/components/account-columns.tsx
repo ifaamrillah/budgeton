@@ -26,8 +26,10 @@ export const accountColumns: ColumnDef<Account>[] = [
   {
     accessorKey: "id",
     header: "No",
-    size: 20,
     cell: ({ row }) => row.index + 1,
+    meta: {
+      className: "w-[40px]",
+    },
   },
   {
     accessorKey: "name",
@@ -37,7 +39,9 @@ export const accountColumns: ColumnDef<Account>[] = [
   {
     accessorKey: "startingBalance",
     header: "Starting balance",
-    size: 90,
+    meta: {
+      className: "w-[200px]",
+    },
     cell: ({ row }) => {
       const startingBalance = parseFloat(row.getValue("startingBalance"));
       const formatted = new Intl.NumberFormat("id-ID", {
@@ -48,63 +52,11 @@ export const accountColumns: ColumnDef<Account>[] = [
     },
   },
   {
-    accessorKey: "start",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "1",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "2",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
-    accessorKey: "3",
-    header: "Starting balance",
-    size: 90,
-    cell: ({ row }) => <div>200000</div>,
-  },
-  {
     accessorKey: "status",
     header: "Status",
-    size: 40,
+    meta: {
+      className: "w-[100px]",
+    },
     cell: ({ row }) => (
       <Badge
         className="rounded-full shadow-none"
@@ -117,7 +69,9 @@ export const accountColumns: ColumnDef<Account>[] = [
   {
     id: "actions",
     header: "Action",
-    size: 20,
+    meta: {
+      className: "w-[60px]",
+    },
     cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
   },
 ];

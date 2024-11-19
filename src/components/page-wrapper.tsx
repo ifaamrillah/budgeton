@@ -1,3 +1,5 @@
+"use client";
+
 import { Fragment, ReactNode } from "react";
 
 import {
@@ -9,7 +11,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 interface PageWrapperProps {
@@ -26,6 +28,8 @@ export function PageWrapper({
   className,
   breadcrumb,
 }: PageWrapperProps) {
+  const { open, isMobile } = useSidebar();
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b">
@@ -36,7 +40,6 @@ export function PageWrapper({
             <BreadcrumbList>
               {breadcrumb.map(({ label, href }, index) => {
                 const isLast = breadcrumb.length === index + 1;
-
                 return isLast ? (
                   <BreadcrumbItem key={index}>
                     <BreadcrumbPage>{label}</BreadcrumbPage>
@@ -54,7 +57,17 @@ export function PageWrapper({
           </Breadcrumb>
         </div>
       </header>
-      <main className={cn("w-full p-4", className)}>{children}</main>
+      <main
+        className={cn(
+          "p-4",
+          open && !isMobile
+            ? "w-[calc(100vw-var(--sidebar-width))]"
+            : "w-screen",
+          className
+        )}
+      >
+        {children}
+      </main>
     </>
   );
 }

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps {
   data: Record<string, unknown>[];
@@ -95,7 +96,13 @@ export const DataTable = ({
                     </Button>
                   );
                   return (
-                    <TableHead key={header.id} className="whitespace-nowrap">
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        "whitespace-nowrap",
+                        header.column.columnDef.meta?.className
+                      )}
+                    >
                       {header.isPlaceholder
                         ? null
                         : header.column.columnDef.enableSorting
@@ -126,7 +133,13 @@ export const DataTable = ({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="whitespace-nowrap">
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        "whitespace-nowrap",
+                        cell.column.columnDef.meta?.className
+                      )}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
