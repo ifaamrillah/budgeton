@@ -26,18 +26,11 @@ import {
   CredenzaHeader,
   CredenzaTitle,
 } from "@/components/ui/credenza";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/form/form-input";
+import { FormCurrency } from "@/components/form/form-currency";
+import { FormSwitch } from "@/components/form/form-switch";
 
 interface AccountModalProps {
   id?: string;
@@ -104,7 +97,7 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
     }
   }, [id, data, form]);
 
-  const onSubmit = async (values: TypeAccountValidator) => {
+  const onSubmit = (values: TypeAccountValidator) => {
     if (id) {
       mutateUpdateAccount(values);
     } else {
@@ -123,93 +116,28 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
         <CredenzaBody>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-              <FormField
-                control={form.control}
+              <FormInput
+                form={form}
                 name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Bank Account"
-                        {...field}
-                        disabled={
-                          isPendingCreateAccount || isPendingUpdateAccount
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Name"
+                placeholder="Account name"
+                required
+                disabled={isPendingCreateAccount || isPendingUpdateAccount}
               />
-              <FormField
-                control={form.control}
+              <FormCurrency
+                form={form}
                 name="startingBalance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Starting Balance</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <span className="text-muted-foreground font-medium text-sm">
-                            Rp
-                          </span>
-                        </div>
-                        <Input
-                          id="currency"
-                          type="text"
-                          placeholder="10,000"
-                          className="pl-10"
-                          value={
-                            field.value === 0 || field.value
-                              ? new Intl.NumberFormat().format(
-                                  Number(field.value)
-                                )
-                              : ""
-                          }
-                          onChange={(e) => {
-                            const rawAmount = e.target.value.replace(/\D/g, "");
-                            const finalAmount =
-                              rawAmount === "" ? 0 : Number(rawAmount);
-                            field.onChange(finalAmount);
-                            const formattedAmount =
-                              new Intl.NumberFormat().format(finalAmount);
-                            e.target.value = formattedAmount;
-                          }}
-                          disabled={
-                            isPendingCreateAccount || isPendingUpdateAccount
-                          }
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="Starting Balance"
+                required
+                disabled={isPendingCreateAccount || isPendingUpdateAccount}
               />
-              <FormField
-                control={form.control}
+              <FormSwitch
+                form={form}
                 name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Status</FormLabel>
-                    <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormDescription>
-                          You can make account active or inactive.
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={
-                            isPendingCreateAccount || isPendingUpdateAccount
-                          }
-                        />
-                      </FormControl>
-                    </div>
-                  </FormItem>
-                )}
+                label="Status"
+                required
+                placeholder="You can make account active or inactive."
+                disabled={isPendingCreateAccount || isPendingUpdateAccount}
               />
             </form>
           </Form>
