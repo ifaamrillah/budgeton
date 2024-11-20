@@ -16,7 +16,7 @@ export const FormSwitch = <T extends FieldValues>({
   name,
   label,
   required,
-  placeholder = "Enter here",
+  placeholder = "You can make it active/inactive",
   disabled,
   description,
 }: FormProps<T>) => {
