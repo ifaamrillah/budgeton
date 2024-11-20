@@ -20,6 +20,7 @@ model User {
   expiredPlan DateTime?
 
   accounts Account[] 
+  incomes Income[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -31,6 +32,8 @@ model Account {
   startingBalance Decimal
   status Boolean @default(true)
 
+  incomes Income[]
+
   userId String
   user User @relation(fields: [userId], references: [id])
 
@@ -38,4 +41,20 @@ model Account {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, name])
+}
+
+model Income {
+  id String @id @default(cuid())
+  date DateTime
+  description String?
+  amount Decimal
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  accountId String
+  account Account @relation(fields: [accountId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
