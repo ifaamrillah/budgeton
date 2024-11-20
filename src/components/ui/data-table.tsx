@@ -80,8 +80,8 @@ export const DataTable = ({
                 {headerGroup.headers.map((header) => {
                   const sortButton = (
                     <Button
-                      variant="blank"
-                      className="p-0"
+                      variant="ghost"
+                      className="p-0 hover:bg-transparent"
                       onClick={() =>
                         header.column.toggleSorting(
                           header.column.getIsSorted() === "asc"
