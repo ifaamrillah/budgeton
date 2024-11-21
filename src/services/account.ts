@@ -1,10 +1,27 @@
 import { TypeAccountValidator } from "@/validator/account-validator";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
+import { Account } from "@prisma/client";
 
 export async function getAllAccount(params?: Record<string, unknown>) {
   return await apiGet({
     url: "/account",
     params,
+  });
+}
+
+export async function getAccountOptions(params?: Record<string, unknown>) {
+  return await apiGet({
+    url: "/account",
+    params,
+  }).then((data) => {
+    if (data?.data) {
+      const transformedData = data?.data?.map((item: Account) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      return transformedData;
+    }
+    return data;
   });
 }
 
