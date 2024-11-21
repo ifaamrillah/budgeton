@@ -52,7 +52,7 @@ export const FormCombobox = <T extends FieldValues>({
 
   const debouncedFilterName = useDebounce(filterName, 500);
 
-  const { data: options } = useQuery({
+  const { data: options, isLoading } = useQuery({
     queryKey: ["account-options", debouncedFilterName],
     queryFn: () =>
       optionFn({
@@ -100,7 +100,9 @@ export const FormCombobox = <T extends FieldValues>({
                     onValueChange={setFilterName}
                   />
                   <CommandList>
-                    <CommandEmpty>No option found.</CommandEmpty>
+                    <CommandEmpty>
+                      {isLoading ? "Searching..." : "No option found."}
+                    </CommandEmpty>
                     <CommandGroup>
                       {options?.map((option: any) => (
                         <CommandItem
