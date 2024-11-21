@@ -73,14 +73,7 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 label="Account"
                 required
                 placeholder="Select account"
-                optionFn={() =>
-                  getAccountOptions({
-                    pagination: {
-                      pageIndex: 1,
-                      pageSize: 10,
-                    },
-                  })
-                }
+                optionFn={getAccountOptions}
               />
             </form>
           </Form>

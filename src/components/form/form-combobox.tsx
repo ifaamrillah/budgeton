@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { FieldValues, Path, PathValue } from "react-hook-form";
 import { Check, ChevronsUpDown } from "lucide-react";
 
+import { useDebounce } from "@/hooks/use-debounce";
+
 import {
   FormControl,
   FormDescription,
@@ -41,13 +43,24 @@ export const FormCombobox = <T extends FieldValues>({
   description,
   optionFn,
 }: FormProps<T> & {
-  optionFn: () => Promise<PathValue<T, Path<T>>>;
+  optionFn: (
+    params?: Record<string, unknown>
+  ) => Promise<PathValue<T, Path<T>>>;
 }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
+  const [filterName, setFilterName] = useState<string>("");
+
+  const debouncedFilterName = useDebounce(filterName, 500);
 
   const { data: options } = useQuery({
-    queryKey: ["account-options"],
-    queryFn: optionFn,
+    queryKey: ["account-options", debouncedFilterName],
+    queryFn: () =>
+      optionFn({
+        filter: {
+          name: debouncedFilterName,
+        },
+      }),
+    enabled: !!debouncedFilterName,
   });
 
   return (
@@ -81,7 +94,11 @@ export const FormCombobox = <T extends FieldValues>({
               </PopoverTrigger>
               <PopoverContent align="start" className="p-0">
                 <Command>
-                  <CommandInput placeholder="Search language..." />
+                  <CommandInput
+                    placeholder="Search option..."
+                    value={filterName}
+                    onValueChange={setFilterName}
+                  />
                   <CommandList>
                     <CommandEmpty>No option found.</CommandEmpty>
                     <CommandGroup>
