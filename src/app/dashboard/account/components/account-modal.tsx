@@ -115,7 +115,10 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
         </CredenzaHeader>
         <CredenzaBody>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 my-4"
+            >
               <FormInput
                 form={form}
                 name="name"

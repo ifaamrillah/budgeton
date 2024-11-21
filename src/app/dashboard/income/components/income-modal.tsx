@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { getAccountOptions } from "@/services/account";
 import {
   IncomeValidator,
   TypeIncomeValidator,
@@ -23,6 +24,7 @@ import { Form } from "@/components/ui/form";
 import { FormCurrency } from "@/components/form/form-currency";
 import { FormDate } from "@/components/form/form-date";
 import { FormTextArea } from "@/components/form/form-textarea";
+import { FormCombobox } from "@/components/form/form-combobox";
 
 interface IncomeModalProps {
   id?: string;
@@ -52,7 +54,10 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         </CredenzaHeader>
         <CredenzaBody>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 my-4"
+            >
               <FormDate form={form} name="date" label="Date" required />
               <FormTextArea
                 form={form}
@@ -62,6 +67,21 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 placeholder="Enter your income details"
               />
               <FormCurrency form={form} name="amount" label="Amount" required />
+              <FormCombobox
+                form={form}
+                name="accountId"
+                label="Account"
+                required
+                placeholder="Select account"
+                optionFn={() =>
+                  getAccountOptions({
+                    pagination: {
+                      pageIndex: 1,
+                      pageSize: 10,
+                    },
+                  })
+                }
+              />
             </form>
           </Form>
         </CredenzaBody>
