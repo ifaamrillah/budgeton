@@ -18,6 +18,7 @@ export const IncomeValidator = z.object({
   amount: z
     .number({ message: "Amount must be a number" })
     .min(0, { message: "Amount must not be minus" }),
+  accountId: z.string({ message: "Account is required" }),
 });
 
 export type TypeIncomeValidator = z.infer<typeof IncomeValidator>;
