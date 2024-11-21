@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FieldValues, Path, PathValue } from "react-hook-form";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 
 import {
   FormControl,
@@ -40,6 +43,8 @@ export const FormCombobox = <T extends FieldValues>({
 }: FormProps<T> & {
   optionFn: () => Promise<PathValue<T, Path<T>>>;
 }) => {
+  const [isOpen, setOpen] = useState<boolean>(false);
+
   const { data: options } = useQuery({
     queryKey: ["account-options"],
     queryFn: optionFn,
@@ -53,7 +58,7 @@ export const FormCombobox = <T extends FieldValues>({
         <FormItem>
           {label && <FormLabel required={required}>{label}</FormLabel>}
           <div className="w-full">
-            <Popover>
+            <Popover open={isOpen} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
@@ -86,6 +91,7 @@ export const FormCombobox = <T extends FieldValues>({
                           key={option.value}
                           onSelect={() => {
                             form.setValue(name, option.value);
+                            setOpen(false);
                           }}
                         >
                           {option.label}
