@@ -43,12 +43,18 @@ export async function GET(req: NextRequest) {
   const pageSize = parseInt(searchParams.get("pagination[pageSize]") || "10");
   const sortBy = searchParams.get("sorting[sortBy]") || undefined;
   const sortDesc = searchParams.get("sorting[sortDesc]") === "true";
+  const filterName = searchParams.get("filter[name]") || undefined;
+  console.log(filterName);
+
   const orderBy = sortBy ? { [sortBy]: sortDesc ? "desc" : "asc" } : undefined;
 
-  // Get All Account
+  // Get All Account with Filter
   const getAll = await db.account.findMany({
     where: {
       userId: user.id,
+      ...(filterName && {
+        name: { contains: filterName, mode: "insensitive" },
+      }), // Filter by name (case-insensitive)
     },
     skip: (pageIndex - 1) * pageSize,
     take: pageSize,
@@ -59,6 +65,9 @@ export async function GET(req: NextRequest) {
   const totalData = await db.account.count({
     where: {
       userId: user.id,
+      ...(filterName && {
+        name: { contains: filterName, mode: "insensitive" },
+      }), // Count with filter
     },
   });
   const totalPage = Math.ceil(totalData / pageSize);
