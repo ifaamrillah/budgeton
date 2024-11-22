@@ -41,11 +41,9 @@ export const FormCombobox = <T extends FieldValues>({
   placeholder = "Select options",
   disabled,
   description,
-  optionFn,
+  fetchOptions,
 }: FormProps<T> & {
-  optionFn: (
-    params?: Record<string, unknown>
-  ) => Promise<PathValue<T, Path<T>>>;
+  fetchOptions: (search: string) => Promise<PathValue<T, Path<T>>>;
 }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const [filterName, setFilterName] = useState<string>("");
@@ -54,12 +52,7 @@ export const FormCombobox = <T extends FieldValues>({
 
   const { data: options, isLoading } = useQuery({
     queryKey: ["account-options", debouncedFilterName],
-    queryFn: () =>
-      optionFn({
-        filter: {
-          name: debouncedFilterName,
-        },
-      }),
+    queryFn: () => fetchOptions(debouncedFilterName),
     enabled: !!debouncedFilterName,
   });
 

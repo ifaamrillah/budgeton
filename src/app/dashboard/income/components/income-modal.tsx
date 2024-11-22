@@ -73,7 +73,14 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 label="Account"
                 required
                 placeholder="Select account"
-                optionFn={getAccountOptions}
+                fetchOptions={(search) =>
+                  getAccountOptions({
+                    filter: {
+                      name: search,
+                      status: true,
+                    },
+                  })
+                }
               />
             </form>
           </Form>
