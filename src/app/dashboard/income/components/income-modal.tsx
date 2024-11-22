@@ -36,7 +36,7 @@ interface IncomeModalProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
+export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
   const queryClient = useQueryClient();
 
   const form = useForm<TypeIncomeValidator>({
@@ -64,7 +64,6 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
     });
 
   const onSubmit = (values: TypeIncomeValidator) => {
-    console.log(values);
     mutateCreateIncome(values);
   };
 
