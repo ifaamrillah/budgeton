@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
+import { Decimal } from "@prisma/client/runtime/library";
 
 import { AccountValidator } from "@/validator/account-validator";
 import { db } from "@/lib/db";
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
     return status === "true" ? true : status === "false" ? false : undefined;
   })();
 
-  // Get All Account with Filters
+  // Get All Account with Filters and Incomes for balance calculation
   const getAll = await db.account.findMany({
     where: {
       userId: user.id,
@@ -69,6 +70,28 @@ export async function GET(req: NextRequest) {
     skip: (pageIndex - 1) * pageSize,
     take: pageSize,
     orderBy: orderBy,
+    include: {
+      incomes: {
+        select: {
+          amount: true,
+        },
+      },
+    },
+  });
+
+  // Calculate balance for each account using decimal.js
+  const accountsWithBalance = getAll.map((account) => {
+    const totalIncome = account.incomes.reduce((acc, income) => {
+      const incomeAmount = new Decimal(income.amount);
+      return acc.plus(incomeAmount);
+    }, new Decimal(0));
+
+    const balance = new Decimal(account.startingBalance).plus(totalIncome);
+
+    return {
+      ...account,
+      balance,
+    };
   });
 
   // Pagination
@@ -85,11 +108,11 @@ export async function GET(req: NextRequest) {
   });
   const totalPage = Math.ceil(totalData / pageSize);
 
-  if (getAll.length > 0) {
+  if (accountsWithBalance.length > 0) {
     return NextResponse.json(
       {
         message: "Get all account successfully.",
-        data: getAll,
+        data: accountsWithBalance,
         pagination: {
           pageIndex,
           pageSize,
@@ -105,7 +128,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  if (getAll.length <= 0) {
+  if (accountsWithBalance.length <= 0) {
     return NextResponse.json(
       {
         message: "No accounts found.",
