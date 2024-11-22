@@ -63,7 +63,6 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 form={form}
                 name="description"
                 label="Description"
-                required
                 placeholder="Enter your income details"
               />
               <FormCurrency form={form} name="amount" label="Amount" required />

@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
   );
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   // Check Authorization
   const user = await currentUser();
   if (!user) {
@@ -201,9 +201,7 @@ export async function POST(req: Request) {
   // Create Account
   const create = await db.account.create({
     data: {
-      name: body.name,
-      status: body.status,
-      startingBalance: body.startingBalance,
+      ...validatedFields.data,
       userId: user.id,
     },
   });

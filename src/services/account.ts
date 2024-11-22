@@ -1,6 +1,7 @@
+import { Account } from "@prisma/client";
+
 import { TypeAccountValidator } from "@/validator/account-validator";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
-import { Account } from "@prisma/client";
 
 export async function getAllAccount(params?: Record<string, unknown>) {
   return await apiGet({
