@@ -37,24 +37,34 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Search Params
   const searchParams = req.nextUrl.searchParams;
+
+  // Pagination
   const pageIndex = parseInt(searchParams.get("pagination[pageIndex]") || "1");
   const pageSize = parseInt(searchParams.get("pagination[pageSize]") || "10");
+
+  // Sorting
   const sortBy = searchParams.get("sorting[sortBy]") || undefined;
   const sortDesc = searchParams.get("sorting[sortDesc]") === "true";
-  const filterName = searchParams.get("filter[name]") || undefined;
-  console.log(filterName);
-
   const orderBy = sortBy ? { [sortBy]: sortDesc ? "desc" : "asc" } : undefined;
 
-  // Get All Account with Filter
+  // Filters
+  const filterName = searchParams.get("filter[name]") || undefined;
+  const filterStatus = (() => {
+    const status = searchParams.get("filter[status]");
+    return status === "true" ? true : status === "false" ? false : undefined;
+  })();
+
+  // Get All Account with Filters
   const getAll = await db.account.findMany({
     where: {
       userId: user.id,
       ...(filterName && {
         name: { contains: filterName, mode: "insensitive" },
-      }), // Filter by name (case-insensitive)
+      }),
+      ...(filterStatus !== undefined && {
+        status: filterStatus,
+      }),
     },
     skip: (pageIndex - 1) * pageSize,
     take: pageSize,
@@ -67,7 +77,10 @@ export async function GET(req: NextRequest) {
       userId: user.id,
       ...(filterName && {
         name: { contains: filterName, mode: "insensitive" },
-      }), // Count with filter
+      }),
+      ...(filterStatus !== undefined && {
+        status: filterStatus,
+      }),
     },
   });
   const totalPage = Math.ceil(totalData / pageSize);
