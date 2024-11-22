@@ -2,9 +2,13 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account";
+import { createIncome } from "@/services/income";
 import {
   IncomeValidator,
   TypeIncomeValidator,
@@ -33,6 +37,8 @@ interface IncomeModalProps {
 }
 
 export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
+  const queryClient = useQueryClient();
+
   const form = useForm<TypeIncomeValidator>({
     resolver: zodResolver(IncomeValidator),
     defaultValues: {
@@ -42,8 +48,24 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
     },
   });
 
+  const { mutate: mutateCreateIncome, isPending: isPendingCreateAccount } =
+    useMutation({
+      mutationFn: (values: TypeIncomeValidator) => createIncome(values),
+      onSuccess: () => {
+        toast.success("Create income successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Create income failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["income"] });
+        setOpen(false);
+      },
+    });
+
   const onSubmit = (values: TypeIncomeValidator) => {
     console.log(values);
+    mutateCreateIncome(values);
   };
 
   return (
@@ -58,20 +80,34 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4 my-4"
             >
-              <FormDate form={form} name="date" label="Date" required />
+              <FormDate
+                form={form}
+                name="date"
+                label="Date"
+                required
+                disabled={isPendingCreateAccount}
+              />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
                 placeholder="Enter your income details"
+                disabled={isPendingCreateAccount}
               />
-              <FormCurrency form={form} name="amount" label="Amount" required />
+              <FormCurrency
+                form={form}
+                name="amount"
+                label="Amount"
+                required
+                disabled={isPendingCreateAccount}
+              />
               <FormCombobox
                 form={form}
                 name="accountId"
                 label="Account"
                 required
                 placeholder="Select account"
+                disabled={isPendingCreateAccount}
                 fetchOptions={(search) =>
                   getAccountOptions({
                     filter: {
@@ -86,9 +122,16 @@ export default function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={isPendingCreateAccount}>
+              Cancel
+            </Button>
           </CredenzaClose>
-          <Button onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+          <Button
+            onClick={() => form.handleSubmit(onSubmit)()}
+            disabled={isPendingCreateAccount}
+          >
+            {isPendingCreateAccount ? "Saving..." : "Save"}
+          </Button>
         </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
