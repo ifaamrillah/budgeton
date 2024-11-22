@@ -38,12 +38,27 @@ export const accountColumns: ColumnDef<Account>[] = [
   },
   {
     accessorKey: "startingBalance",
-    header: "Starting balance",
+    header: "Starting Balance",
     meta: {
       className: "w-[200px]",
     },
     cell: ({ row }) => {
       const startingBalance = parseFloat(row.getValue("startingBalance"));
+      const formatted = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+      }).format(startingBalance);
+      return formatted;
+    },
+  },
+  {
+    accessorKey: "balance",
+    header: "Balance",
+    meta: {
+      className: "w-[200px]",
+    },
+    cell: ({ row }) => {
+      const startingBalance = parseFloat(row.getValue("balance"));
       const formatted = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
