@@ -8,7 +8,11 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account";
-import { createIncome, getIncomeById } from "@/services/income";
+import {
+  createIncome,
+  getIncomeById,
+  updateIncomeById,
+} from "@/services/income";
 import {
   IncomeValidator,
   TypeIncomeValidator,
@@ -50,12 +54,12 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
   });
 
   const { data, isSuccess } = useQuery({
-    queryKey: ["account", id],
+    queryKey: ["income", id],
     queryFn: () => getIncomeById(id),
     enabled: !!id,
   });
 
-  const { mutate: mutateCreateIncome, isPending: isPendingCreateAccount } =
+  const { mutate: mutateCreateIncome, isPending: isPendingCreateIncome } =
     useMutation({
       mutationFn: (values: TypeIncomeValidator) => createIncome(values),
       onSuccess: () => {
@@ -70,10 +74,26 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
       },
     });
 
+  const { mutate: mutateUpdateIncome, isPending: isPendingUpdateIncome } =
+    useMutation({
+      mutationFn: (values: TypeIncomeValidator) =>
+        updateIncomeById(id as string, values),
+      onSuccess: () => {
+        toast.success("Edit income successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Edit income failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["income"] });
+        setOpen(false);
+      },
+    });
+
   useEffect(() => {
     if (id && data?.data) {
       form.reset({
-        date: data?.data?.date,
+        date: new Date(data?.data?.date),
         description: data?.data?.description,
         amount: +data?.data?.amount,
         accountId: data?.data?.account?.id,
@@ -82,7 +102,11 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
   }, [id, data, form]);
 
   const onSubmit = (values: TypeIncomeValidator) => {
-    mutateCreateIncome(values);
+    if (id) {
+      mutateUpdateIncome(values);
+    } else {
+      mutateCreateIncome(values);
+    }
   };
 
   if (id && !isSuccess) return null;
@@ -104,21 +128,21 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 name="date"
                 label="Date"
                 required
-                disabled={isPendingCreateAccount}
+                disabled={isPendingCreateIncome || isPendingUpdateIncome}
               />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
                 placeholder="Enter your income details"
-                disabled={isPendingCreateAccount}
+                disabled={isPendingCreateIncome || isPendingUpdateIncome}
               />
               <FormCurrency
                 form={form}
                 name="amount"
                 label="Amount"
                 required
-                disabled={isPendingCreateAccount}
+                disabled={isPendingCreateIncome || isPendingUpdateIncome}
               />
               <FormCombobox
                 form={form}
@@ -126,7 +150,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 label="Account"
                 required
                 placeholder="Select account"
-                disabled={isPendingCreateAccount}
+                disabled={isPendingCreateIncome || isPendingUpdateIncome}
                 defaultValue={{
                   value: data?.data?.account?.id,
                   label: data?.data?.account?.name,
@@ -145,15 +169,20 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline" disabled={isPendingCreateAccount}>
+            <Button
+              variant="outline"
+              disabled={isPendingCreateIncome || isPendingUpdateIncome}
+            >
               Cancel
             </Button>
           </CredenzaClose>
           <Button
             onClick={() => form.handleSubmit(onSubmit)()}
-            disabled={isPendingCreateAccount}
+            disabled={isPendingCreateIncome || isPendingUpdateIncome}
           >
-            {isPendingCreateAccount ? "Saving..." : "Save"}
+            {isPendingCreateIncome || isPendingUpdateIncome
+              ? "Saving..."
+              : "Save"}
           </Button>
         </CredenzaFooter>
       </CredenzaContent>
