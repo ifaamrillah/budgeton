@@ -1,50 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
 import { IncomeValidator } from "@/lib/validator";
+
+import { authorizeAndValidateUser } from "@/server/auth-server";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Check Authorization
-  const user = await currentUser();
-  if (!user) {
-    return NextResponse.json(
-      { message: "Unauthorized access." },
-      { status: 401 }
-    );
-  }
-
-  // Check Synchronization
-  const existingUser = await db.user.findUnique({
-    where: { id: user.id },
-  });
-  if (!existingUser) {
-    return NextResponse.json(
-      { message: "Users are not synchronized" },
-      { status: 422 }
-    );
-  }
-
-  // Check Expired Plan
-  if (existingUser.expiredPlan && existingUser.plan !== "LIFETIME") {
-    const expiredDate = new Date(existingUser.expiredPlan);
-    const currentDate = new Date();
-    if (expiredDate < currentDate) {
-      return NextResponse.json(
-        { message: "User plan has expired." },
-        { status: 403 }
-      );
-    }
-  }
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
 
   // Params
   const id = (await params).id;
 
-  // Get Income By Id
-  const getById = await db.income.findUnique({
+  // Get income by id
+  const getIncomeById = await db.income.findUnique({
     where: {
       id,
     },
@@ -57,11 +30,9 @@ export async function GET(
       },
     },
   });
-  if (!getById) {
+  if (!getIncomeById) {
     return NextResponse.json(
-      {
-        message: `Income with id: "${id}" was not found.`,
-      },
+      { message: `Income with id: "${id}" was not found.` },
       { status: 404 }
     );
   }
@@ -69,7 +40,7 @@ export async function GET(
   return NextResponse.json(
     {
       message: `Get income with id: "${id}" successfully.`,
-      data: getById,
+      data: getIncomeById,
     },
     { status: 200 }
   );
@@ -79,50 +50,20 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Check Authorization
-  const user = await currentUser();
-  if (!user) {
-    return NextResponse.json(
-      { message: "Unauthorized access." },
-      { status: 401 }
-    );
-  }
-
-  // Check Synchronization
-  const existingUser = await db.user.findUnique({
-    where: { id: user.id },
-  });
-  if (!existingUser) {
-    return NextResponse.json(
-      { message: "Users are not synchronized" },
-      { status: 422 }
-    );
-  }
-
-  // Check Expired Plan
-  if (existingUser.expiredPlan && existingUser.plan !== "LIFETIME") {
-    const expiredDate = new Date(existingUser.expiredPlan);
-    const currentDate = new Date();
-    if (expiredDate < currentDate) {
-      return NextResponse.json(
-        { message: "User plan has expired." },
-        { status: 403 }
-      );
-    }
-  }
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
 
   // Params
   const id = (await params).id;
 
   // Check id is valid
-  const getById = await db.income.findUnique({
+  const getIncomeById = await db.income.findUnique({
     where: { id },
   });
-  if (!getById) {
+  if (!getIncomeById) {
     return NextResponse.json(
-      {
-        message: `Income with id: "${id}" was not found.`,
-      },
+      { message: `Income with id: "${id}" was not found.` },
       { status: 404 }
     );
   }
@@ -131,7 +72,7 @@ export async function PATCH(
   const body = await req.json();
   if (body.date) body.date = new Date(body.date);
 
-  // Field Validation
+  // Field validation
   const validatedFields = IncomeValidator.safeParse(body);
   if (!validatedFields.success) {
     return NextResponse.json(
@@ -144,7 +85,7 @@ export async function PATCH(
     );
   }
 
-  // Update Income
+  // Update income by id
   const update = await db.income.update({
     where: {
       id,
@@ -171,11 +112,6 @@ export async function PATCH(
     );
   }
 
-  // Internal Server Error
-  return NextResponse.json(
-    {
-      message: "Edit income failed.",
-    },
-    { status: 500 }
-  );
+  // Internal server error
+  return NextResponse.json({ message: "Edit income failed." }, { status: 500 });
 }

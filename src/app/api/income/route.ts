@@ -1,61 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
 import { IncomeValidator } from "@/lib/validator";
+import { parseQueryParams } from "@/lib/utils";
+
+import { authorizeAndValidateUser } from "@/server/auth-server";
 
 export async function GET(req: NextRequest) {
-  // Check Authorization
-  const user = await currentUser();
-  if (!user) {
-    return NextResponse.json(
-      { message: "Unauthorized access." },
-      { status: 401 }
-    );
-  }
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+  const { user } = authResult;
 
-  // Check Synchronization
-  const existingUser = await db.user.findUnique({
-    where: { id: user.id },
-  });
-  if (!existingUser) {
-    return NextResponse.json(
-      { message: "Users are not synchronized" },
-      { status: 422 }
-    );
-  }
+  // Query params
+  const { pagination, sorting, filters } = parseQueryParams(
+    req.nextUrl.searchParams
+  );
 
-  // Check Expired Plan
-  if (existingUser.expiredPlan && existingUser.plan !== "LIFETIME") {
-    const expiredDate = new Date(existingUser.expiredPlan);
-    const currentDate = new Date();
-    if (expiredDate < currentDate) {
-      return NextResponse.json(
-        { message: "User plan has expired." },
-        { status: 403 }
-      );
-    }
-  }
-
-  const searchParams = req.nextUrl.searchParams;
-
-  // Pagination
-  const pageIndex = parseInt(searchParams.get("pagination[pageIndex]") || "1");
-  const pageSize = parseInt(searchParams.get("pagination[pageSize]") || "10");
-
-  // Sorting
-  const sortBy = searchParams.get("sorting[sortBy]") || undefined;
-  const sortDesc = searchParams.get("sorting[sortDesc]") === "true";
-  const orderBy = sortBy ? { [sortBy]: sortDesc ? "desc" : "asc" } : undefined;
-
-  // Get All Income with Filters
-  const getAll = await db.income.findMany({
+  // Get all income
+  const getAllIncome = await db.income.findMany({
     where: {
       userId: user.id,
     },
-    skip: (pageIndex - 1) * pageSize,
-    take: pageSize,
-    orderBy: orderBy,
+    skip: (pagination.pageIndex - 1) * pagination.pageSize,
+    take: pagination.pageSize,
+    orderBy: sorting.orderBy,
     include: {
       account: {
         select: {
@@ -66,100 +35,43 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // Pagination
+  // Pagination response
   const totalData = await db.income.count({
     where: {
       userId: user.id,
     },
   });
-  const totalPage = Math.ceil(totalData / pageSize);
-
-  if (getAll.length > 0) {
-    return NextResponse.json(
-      {
-        message: "Get all income successfully.",
-        data: getAll,
-        pagination: {
-          pageIndex,
-          pageSize,
-          totalPage,
-          totalData,
-        },
-        sorting: {
-          sortBy,
-          sortDesc,
-        },
-      },
-      { status: 200 }
-    );
-  }
-
-  if (getAll.length <= 0) {
-    return NextResponse.json(
-      {
-        message: "No incomes found.",
-        data: [],
-        pagination: {
-          pageIndex,
-          pageSize,
-          totalPage: 0,
-          totalData: 0,
-        },
-        sorting: {
-          sortBy,
-          sortDesc,
-        },
-      },
-      { status: 200 }
-    );
-  }
+  const totalPage = Math.ceil(totalData / pagination.pageSize);
 
   return NextResponse.json(
     {
-      message: "Get all income failed.",
+      message: getAllIncome?.length
+        ? "Get all income successfully."
+        : "No incomes found.",
+      data: getAllIncome,
+      filters,
+      pagination: {
+        ...pagination,
+        totalPage,
+        totalData,
+      },
+      sorting,
     },
-    { status: 500 }
+    { status: 200 }
   );
 }
 
 export async function POST(req: NextRequest) {
-  // Check Authorization
-  const user = await currentUser();
-  if (!user) {
-    return NextResponse.json(
-      { message: "Unauthorized access." },
-      { status: 401 }
-    );
-  }
-
-  // Check Synchronization
-  const existingUser = await db.user.findUnique({
-    where: { id: user.id },
-  });
-  if (!existingUser) {
-    return NextResponse.json(
-      { message: "Users are not synchronized" },
-      { status: 422 }
-    );
-  }
-
-  // Check Expired Plan
-  if (existingUser.expiredPlan && existingUser.plan !== "LIFETIME") {
-    const expiredDate = new Date(existingUser.expiredPlan);
-    const currentDate = new Date();
-    if (expiredDate < currentDate) {
-      return NextResponse.json(
-        { message: "User plan has expired." },
-        { status: 403 }
-      );
-    }
-  }
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+  const { user } = authResult;
 
   // Body
   const body = await req.json();
   if (body.date) body.date = new Date(body.date);
 
-  // Field Validation
+  // Field validation
   const validatedFields = IncomeValidator.safeParse(body);
   if (!validatedFields.success) {
     return NextResponse.json(
@@ -172,7 +84,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Create Income
+  // Create income
   const create = await db.income.create({
     data: {
       ...validatedFields.data,
@@ -189,11 +101,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Internal Server Error
+  // Internal server error
   return NextResponse.json(
-    {
-      message: "Create income failed.",
-    },
+    { message: "Create income failed." },
     { status: 500 }
   );
 }
