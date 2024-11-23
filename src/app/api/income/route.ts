@@ -158,6 +158,8 @@ export async function POST(req: NextRequest) {
   // Body
   const body = await req.json();
   if (body.date) body.date = new Date(body.date);
+
+  // Field Validation
   const validatedFields = IncomeValidator.safeParse(body);
   if (!validatedFields.success) {
     return NextResponse.json(

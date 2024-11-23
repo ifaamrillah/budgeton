@@ -191,6 +191,8 @@ export async function POST(req: NextRequest) {
 
   // Body
   const body = await req.json();
+
+  // Field Validation
   const validatedFields = AccountValidator.safeParse(body);
   if (!validatedFields.success) {
     return NextResponse.json(
