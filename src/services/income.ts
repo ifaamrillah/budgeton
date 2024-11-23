@@ -8,6 +8,12 @@ export async function getAllIncome(params?: Record<string, unknown>) {
   });
 }
 
+export async function getIncomeById(id?: string) {
+  return await apiGet({
+    url: `/income/${id}`,
+  });
+}
+
 export async function createIncome(data: TypeIncomeValidator) {
   return await apiPost({
     url: "/income",
