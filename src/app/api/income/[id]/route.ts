@@ -85,13 +85,22 @@ export async function PATCH(
     );
   }
 
+  const transformFields = () => {
+    const { account, ...newData } = validatedFields.data;
+
+    return {
+      ...newData,
+      accountId: account.value,
+    };
+  };
+
   // Update income by id
   const update = await db.income.update({
     where: {
       id,
     },
     data: {
-      ...validatedFields.data,
+      ...transformFields(),
     },
     include: {
       account: {

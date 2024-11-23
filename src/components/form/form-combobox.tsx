@@ -41,19 +41,14 @@ export const FormCombobox = <T extends FieldValues>({
   placeholder = "Select options",
   disabled,
   description,
-  defaultValue,
   fetchOptions,
 }: FormProps<T> & {
-  defaultValue?: {
-    value: unknown;
-    label: string;
-  };
   fetchOptions: (search: string) => Promise<PathValue<T, Path<T>>>;
 }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const [filterName, setFilterName] = useState<string>("");
 
-  const debouncedFilterName = useDebounce(filterName, 500);
+  const debouncedFilterName = useDebounce(filterName, 1000);
 
   const { data: options, isLoading } = useQuery({
     queryKey: ["accountOptions", debouncedFilterName],
@@ -81,13 +76,13 @@ export const FormCombobox = <T extends FieldValues>({
                     )}
                     disabled={disabled}
                   >
-                    {field.value
-                      ? options
-                        ? options?.find(
-                            (option: any) => option.value === field.value
-                          )?.label
-                        : defaultValue?.label
-                      : placeholder}
+                    {filterName?.length > 0
+                      ? options?.find(
+                          (option: any) => option.value === field.value.value
+                        )?.label ||
+                        field.value.label ||
+                        placeholder
+                      : field.value?.label || placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
@@ -109,7 +104,7 @@ export const FormCombobox = <T extends FieldValues>({
                           value={option.label}
                           key={option.value}
                           onSelect={() => {
-                            form.setValue(name, option.value);
+                            form.setValue(name, option);
                             setOpen(false);
                           }}
                         >

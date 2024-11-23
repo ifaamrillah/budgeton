@@ -47,7 +47,10 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
       date: new Date(),
       description: "",
       amount: 0,
-      accountId: "",
+      account: {
+        value: "",
+        label: "",
+      },
     },
   });
 
@@ -94,7 +97,10 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         date: new Date(data?.data?.date),
         description: data?.data?.description,
         amount: +data?.data?.amount,
-        accountId: data?.data?.account?.id,
+        account: {
+          value: data?.data?.account?.id,
+          label: data?.data?.account?.name,
+        },
       });
     }
   }, [id, data, form]);
@@ -144,15 +150,11 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
               />
               <FormCombobox
                 form={form}
-                name="accountId"
+                name="account"
                 label="Account"
                 required
                 placeholder="Select account"
                 disabled={isPendingCreateIncome || isPendingUpdateIncome}
-                defaultValue={{
-                  value: data?.data?.account?.id,
-                  label: data?.data?.account?.name,
-                }}
                 fetchOptions={(search) =>
                   getAccountOptions({
                     filter: {

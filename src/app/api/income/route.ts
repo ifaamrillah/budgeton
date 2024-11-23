@@ -84,11 +84,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const transformFields = () => {
+    const { account, ...newData } = validatedFields.data;
+
+    return {
+      ...newData,
+      accountId: account.value,
+      userId: user.id,
+    };
+  };
+
   // Create income
   const create = await db.income.create({
     data: {
-      ...validatedFields.data,
-      userId: user.id,
+      ...transformFields(),
     },
   });
   if (create) {
