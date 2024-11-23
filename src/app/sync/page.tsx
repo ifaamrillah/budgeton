@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { syncAuth } from "@/services/auth";
+import { syncAuth } from "@/services/auth-service";
 
 import { Spinner } from "@/components/ui/spinner";
 

@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PaginationState, SortingState } from "@tanstack/react-table";
 import { PlusCircle } from "lucide-react";
 
-import { getAllIncome } from "@/services/income";
+import { getAllIncome } from "@/services/income-service";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";

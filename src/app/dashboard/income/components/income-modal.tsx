@@ -7,12 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-import { getAccountOptions } from "@/services/account";
+import { getAccountOptions } from "@/services/account-service";
 import {
   createIncome,
   getIncomeById,
   updateIncomeById,
-} from "@/services/income";
+} from "@/services/income-service";
 
 import { IncomeValidator, TypeIncomeValidator } from "@/lib/validator";
 

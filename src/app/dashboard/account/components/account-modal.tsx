@@ -11,7 +11,7 @@ import {
   createAccount,
   getAccountById,
   updateAccountById,
-} from "@/services/account";
+} from "@/services/account-service";
 
 import { AccountValidator, TypeAccountValidator } from "@/lib/validator";
 
