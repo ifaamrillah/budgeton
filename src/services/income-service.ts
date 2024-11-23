@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
 import { TypeIncomeValidator } from "@/lib/validator";
 
 export async function getAllIncome(params?: Record<string, unknown>) {
@@ -25,5 +25,11 @@ export async function updateIncomeById(id: string, data: TypeIncomeValidator) {
   return await apiPatch({
     url: `/income/${id}`,
     data,
+  });
+}
+
+export async function deleteIncomeById(id: string) {
+  return await apiDelete({
+    url: `/income/${id}`,
   });
 }
