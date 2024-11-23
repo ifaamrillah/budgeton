@@ -41,8 +41,13 @@ export const FormCombobox = <T extends FieldValues>({
   placeholder = "Select options",
   disabled,
   description,
+  defaultValue,
   fetchOptions,
 }: FormProps<T> & {
+  defaultValue?: {
+    value: unknown;
+    label: string;
+  };
   fetchOptions: (search: string) => Promise<PathValue<T, Path<T>>>;
 }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
@@ -77,9 +82,11 @@ export const FormCombobox = <T extends FieldValues>({
                     disabled={disabled}
                   >
                     {field.value
-                      ? options?.find(
-                          (option: any) => option.value === field.value
-                        )?.label
+                      ? options
+                        ? options?.find(
+                            (option: any) => option.value === field.value
+                          )?.label
+                        : defaultValue?.label
                       : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
