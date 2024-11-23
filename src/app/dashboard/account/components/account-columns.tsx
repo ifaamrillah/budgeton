@@ -106,7 +106,7 @@ const ActionButton = ({ id }: { id: string }) => {
         toast.error(err?.response?.data?.message || "Delete account failed.");
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["account"] });
+        queryClient.invalidateQueries({ queryKey: ["getAllAccount"] });
         setModalDeleteOpen(false);
       },
     });

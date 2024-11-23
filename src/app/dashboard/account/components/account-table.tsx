@@ -26,7 +26,7 @@ export const AccountTable = () => {
   ]);
 
   const { data, isFetching } = useQuery({
-    queryKey: ["account", pagination, sorting],
+    queryKey: ["getAllAccount", pagination, sorting],
     queryFn: () =>
       getAllAccount({
         pagination: {

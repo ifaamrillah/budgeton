@@ -49,7 +49,7 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
   });
 
   const { data, isSuccess } = useQuery({
-    queryKey: ["account", id],
+    queryKey: ["getAccountById", id],
     queryFn: () => getAccountById(id),
     enabled: !!id,
   });
@@ -64,7 +64,7 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
         toast.error(err?.response?.data?.message || "Create account failed.");
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["account"] });
+        queryClient.invalidateQueries({ queryKey: ["getAllAccount"] });
         setOpen(false);
       },
     });
@@ -80,7 +80,7 @@ export const AccountModal = ({ id, isOpen, setOpen }: AccountModalProps) => {
         toast.error(err?.response?.data?.message || "Edit account failed.");
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["account"] });
+        queryClient.invalidateQueries({ queryKey: ["getAllAccount"] });
         setOpen(false);
       },
     });

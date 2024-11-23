@@ -26,7 +26,7 @@ export const IncomeTable = () => {
   ]);
 
   const { data, isFetching } = useQuery({
-    queryKey: ["income", pagination, sorting],
+    queryKey: ["getAllIncome", pagination, sorting],
     queryFn: () =>
       getAllIncome({
         pagination: {

@@ -52,7 +52,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
   });
 
   const { data, isSuccess } = useQuery({
-    queryKey: ["income", id],
+    queryKey: ["getIncomeById", id],
     queryFn: () => getIncomeById(id),
     enabled: !!id,
   });
@@ -67,7 +67,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         toast.error(err?.response?.data?.message || "Create income failed.");
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["income"] });
+        queryClient.invalidateQueries({ queryKey: ["getAllIncome"] });
         setOpen(false);
       },
     });
@@ -83,7 +83,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         toast.error(err?.response?.data?.message || "Edit income failed.");
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["income"] });
+        queryClient.invalidateQueries({ queryKey: ["getAllIncome"] });
         setOpen(false);
       },
     });
