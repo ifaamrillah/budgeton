@@ -115,3 +115,52 @@ export async function PATCH(
   // Internal server error
   return NextResponse.json({ message: "Edit income failed." }, { status: 500 });
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+
+  // Params
+  const id = (await params).id;
+
+  // Check id is valid
+  const getIncomeById = await db.income.findUnique({
+    where: { id },
+  });
+  if (!getIncomeById) {
+    return NextResponse.json(
+      {
+        message: `Income with id: "${id}" was not found.`,
+      },
+      { status: 404 }
+    );
+  }
+
+  // Delate income by id
+  const deleteIncomeById = await db.income.delete({
+    where: {
+      id,
+    },
+  });
+  if (deleteIncomeById) {
+    return NextResponse.json(
+      {
+        message: "Delete income successfully.",
+        data: deleteIncomeById,
+      },
+      { status: 200 }
+    );
+  }
+
+  // Internal server error
+  return NextResponse.json(
+    {
+      message: "Edit income failed.",
+    },
+    { status: 500 }
+  );
+}

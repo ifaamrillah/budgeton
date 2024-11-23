@@ -131,10 +131,10 @@ export async function DELETE(
   const id = (await params).id;
 
   // Check id is valid
-  const getById = await db.account.findUnique({
+  const getAccountById = await db.account.findUnique({
     where: { id },
   });
-  if (!getById) {
+  if (!getAccountById) {
     return NextResponse.json(
       {
         message: `Account with id: "${id}" was not found.`,
@@ -152,14 +152,14 @@ export async function DELETE(
   if (deleteAccountById) {
     return NextResponse.json(
       {
-        message: "delete account successfully.",
+        message: "Delete account successfully.",
         data: deleteAccountById,
       },
       { status: 200 }
     );
   }
 
-  // Internal Server Error
+  // Internal server error
   return NextResponse.json(
     {
       message: "Edit account failed.",
