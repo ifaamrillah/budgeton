@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Income } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -15,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+
+import { IncomeModal } from "./income-modal";
 
 export const incomeColumns: ColumnDef<Income>[] = [
   {
@@ -83,11 +88,13 @@ export const incomeColumns: ColumnDef<Income>[] = [
     meta: {
       className: "w-[60px]",
     },
-    cell: () => <ActionButton />,
+    cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
   },
 ];
 
-const ActionButton = () => {
+const ActionButton = ({ id }: { id: string }) => {
+  const [isModalEditOpen, setModalEditOpen] = useState<boolean>(false);
+
   return (
     <>
       <DropdownMenu>
@@ -98,7 +105,10 @@ const ActionButton = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => setModalEditOpen(true)}
+            className="cursor-pointer"
+          >
             <SquarePen className="size-4" /> Edit
           </DropdownMenuItem>
           <DropdownMenuItem className="text-red-500 cursor-pointer">
@@ -106,6 +116,14 @@ const ActionButton = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {isModalEditOpen && (
+        <IncomeModal
+          id={id}
+          isOpen={isModalEditOpen}
+          setOpen={setModalEditOpen}
+        />
+      )}
     </>
   );
 };

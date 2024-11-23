@@ -40,8 +40,6 @@ export const IncomeTable = () => {
       }),
   });
 
-  console.log(data);
-
   return (
     <>
       <div className="flex justify-end gap-4">

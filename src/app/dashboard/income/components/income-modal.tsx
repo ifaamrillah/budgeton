@@ -1,14 +1,14 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account";
-import { createIncome } from "@/services/income";
+import { createIncome, getIncomeById } from "@/services/income";
 import {
   IncomeValidator,
   TypeIncomeValidator,
@@ -45,7 +45,14 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
       date: new Date(),
       description: "",
       amount: 0,
+      accountId: "",
     },
+  });
+
+  const { data, isSuccess } = useQuery({
+    queryKey: ["account", id],
+    queryFn: () => getIncomeById(id),
+    enabled: !!id,
   });
 
   const { mutate: mutateCreateIncome, isPending: isPendingCreateAccount } =
@@ -63,9 +70,22 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
       },
     });
 
+  useEffect(() => {
+    if (id && data?.data) {
+      form.reset({
+        date: data?.data?.date,
+        description: data?.data?.description,
+        amount: +data?.data?.amount,
+        accountId: data?.data?.account?.id,
+      });
+    }
+  }, [id, data, form]);
+
   const onSubmit = (values: TypeIncomeValidator) => {
     mutateCreateIncome(values);
   };
+
+  if (id && !isSuccess) return null;
 
   return (
     <Credenza open={isOpen} onOpenChange={setOpen}>
@@ -107,6 +127,10 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 required
                 placeholder="Select account"
                 disabled={isPendingCreateAccount}
+                defaultValue={{
+                  value: data?.data?.account?.id,
+                  label: data?.data?.account?.name,
+                }}
                 fetchOptions={(search) =>
                   getAccountOptions({
                     filter: {
