@@ -59,6 +59,7 @@ export async function GET(req: NextRequest) {
     include: {
       account: {
         select: {
+          id: true,
           name: true,
         },
       },
