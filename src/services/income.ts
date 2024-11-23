@@ -1,5 +1,5 @@
-import { TypeIncomeValidator } from "@/validator/account-validator";
 import { apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
+import { TypeIncomeValidator } from "@/lib/validator";
 
 export async function getAllIncome(params?: Record<string, unknown>) {
   return await apiGet({

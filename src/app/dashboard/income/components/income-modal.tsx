@@ -13,10 +13,8 @@ import {
   getIncomeById,
   updateIncomeById,
 } from "@/services/income";
-import {
-  IncomeValidator,
-  TypeIncomeValidator,
-} from "@/validator/account-validator";
+
+import { IncomeValidator, TypeIncomeValidator } from "@/lib/validator";
 
 import { Button } from "@/components/ui/button";
 import {

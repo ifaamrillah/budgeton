@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 
-import { IncomeValidator } from "@/validator/account-validator";
 import { db } from "@/lib/db";
+import { IncomeValidator } from "@/lib/validator";
 
 export async function GET(req: NextRequest) {
   // Check Authorization

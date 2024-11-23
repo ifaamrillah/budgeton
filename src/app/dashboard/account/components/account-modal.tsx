@@ -12,10 +12,8 @@ import {
   getAccountById,
   updateAccountById,
 } from "@/services/account";
-import {
-  AccountValidator,
-  TypeAccountValidator,
-} from "@/validator/account-validator";
+
+import { AccountValidator, TypeAccountValidator } from "@/lib/validator";
 
 import {
   Credenza,

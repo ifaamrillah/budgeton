@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
-import { IncomeValidator } from "@/validator/account-validator";
+import { IncomeValidator } from "@/lib/validator";
 
 export async function GET(
   req: NextRequest,

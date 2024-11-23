@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { Decimal } from "@prisma/client/runtime/library";
 
-import { AccountValidator } from "@/validator/account-validator";
 import { db } from "@/lib/db";
+import { AccountValidator } from "@/lib/validator";
 
 export async function GET(req: NextRequest) {
   // Check Authorization
