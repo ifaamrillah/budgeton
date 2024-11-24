@@ -12,11 +12,6 @@ import { AxiosError } from "axios";
 import { deleteIncomeById } from "@/services/income-service";
 
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -24,78 +19,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  ActionColumn,
+  AmountColumn,
+  DateColumn,
+  DescriptionColumn,
+  NameColumn,
+  NoColumn,
+} from "@/components/table-columns";
 
 import { IncomeModal } from "./income-modal";
 
-export const incomeColumns: ColumnDef<Income>[] = [
-  {
+export const incomeColumns: ColumnDef<unknown>[] = [
+  NoColumn({
     accessorKey: "id",
     header: "No",
-    cell: ({ row }) => row.index + 1,
-    meta: {
-      className: "w-[60px]",
-    },
-  },
-  {
+  }),
+  DateColumn({
     accessorKey: "date",
     header: "Date",
     enableSorting: true,
-    meta: {
-      className: "w-[110px]",
-    },
-    cell: ({ row }) => (
-      <div className="text-end">
-        {format(row.getValue("date"), "d MMM yyyy")}
-      </div>
-    ),
-  },
-  {
+    dateFormat: "d MMM yyyy",
+    width: 100,
+  }),
+  DescriptionColumn({
     accessorKey: "description",
     header: "Description",
-    cell: ({ row }) => {
-      const text = row.getValue("description") as string;
-      const maxChar = 50;
-      const ellypsis =
-        text?.length > maxChar ? text.slice(0, maxChar) + "..." : text;
-      return (
-        <Tooltip>
-          <TooltipTrigger className="text-start">{ellypsis}</TooltipTrigger>
-          <TooltipContent className="w-[400px]">{text}</TooltipContent>
-        </Tooltip>
-      );
-    },
-  },
-  {
+    widthAuto: true,
+  }),
+  AmountColumn({
     accessorKey: "amount",
     header: "Amount",
     enableSorting: true,
-    meta: {
-      className: "w-[200px]",
-    },
-    cell: ({ row }) => {
-      const startingBalance = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-      }).format(startingBalance);
-      return formatted;
-    },
-  },
-  {
+  }),
+  NameColumn({
     accessorKey: "account.name",
     header: "Account",
-    meta: {
-      className: "w-[250px]",
-    },
-  },
-  {
-    id: "actions",
+  }),
+  ActionColumn({
+    accessorKey: "actions",
     header: "Action",
-    meta: {
-      className: "w-[60px]",
-    },
     cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
-  },
+  }),
 ];
 
 const ActionButton = ({ id }: { id: string }) => {

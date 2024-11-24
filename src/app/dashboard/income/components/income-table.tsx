@@ -20,8 +20,8 @@ export const IncomeTable = () => {
   });
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "createdAt",
-      desc: false,
+      id: "date",
+      desc: true,
     },
   ]);
 

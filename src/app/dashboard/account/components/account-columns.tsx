@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Settings, SquarePen, Trash2 } from "lucide-react";
-import { Account } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -19,59 +18,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  ActionColumn,
+  AmountColumn,
+  DefaultColumn,
+  NameColumn,
+  NoColumn,
+} from "@/components/table-columns";
 
 import { AccountModal } from "./account-modal";
 
-export const accountColumns: ColumnDef<Account>[] = [
-  {
+export const accountColumns: ColumnDef<unknown>[] = [
+  NoColumn({
     accessorKey: "id",
     header: "No",
-    cell: ({ row }) => row.index + 1,
-    meta: {
-      className: "w-[60px]",
-    },
-  },
-  {
+  }),
+  NameColumn({
     accessorKey: "name",
     header: "Name",
     enableSorting: true,
-  },
-  {
+    widthAuto: true,
+  }),
+  AmountColumn({
     accessorKey: "startingBalance",
     header: "Starting Balance",
-    meta: {
-      className: "w-[200px]",
-    },
-    cell: ({ row }) => {
-      const startingBalance = parseFloat(row.getValue("startingBalance"));
-      const formatted = new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-      }).format(startingBalance);
-      return formatted;
-    },
-  },
-  {
+  }),
+  AmountColumn({
     accessorKey: "balance",
     header: "Balance",
-    meta: {
-      className: "w-[200px]",
-    },
-    cell: ({ row }) => {
-      const startingBalance = parseFloat(row.getValue("balance"));
-      const formatted = new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-      }).format(startingBalance);
-      return formatted;
-    },
-  },
-  {
+  }),
+  DefaultColumn({
     accessorKey: "status",
     header: "Status",
-    meta: {
-      className: "w-[100px]",
-    },
+    width: 150,
     cell: ({ row }) => (
       <Badge
         className="rounded-full shadow-none"
@@ -80,15 +59,12 @@ export const accountColumns: ColumnDef<Account>[] = [
         {row.getValue("status") ? "Active" : "Inactive"}
       </Badge>
     ),
-  },
-  {
-    id: "actions",
+  }),
+  ActionColumn({
+    accessorKey: "actions",
     header: "Action",
-    meta: {
-      className: "w-[60px]",
-    },
     cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
-  },
+  }),
 ];
 
 const ActionButton = ({ id }: { id: string }) => {
