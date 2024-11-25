@@ -53,6 +53,9 @@ export async function PATCH(
   // Check id is valid
   const getAccountById = await db.account.findUnique({
     where: { id },
+    select: {
+      id: true,
+    },
   });
   if (!getAccountById) {
     return NextResponse.json(
@@ -84,6 +87,10 @@ export async function PATCH(
         userId: user.id,
         name: body.name,
       },
+    },
+    select: {
+      id: true,
+      name: true,
     },
   });
   if (existingAccountName && existingAccountName?.id !== id) {
@@ -133,6 +140,14 @@ export async function DELETE(
   // Check id is valid
   const getAccountById = await db.account.findUnique({
     where: { id },
+    select: {
+      id: true,
+      incomes: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
   if (!getAccountById) {
     return NextResponse.json(
@@ -140,6 +155,17 @@ export async function DELETE(
         message: `Account with id: "${id}" was not found.`,
       },
       { status: 404 }
+    );
+  }
+
+  // Check account has relations.
+  if (getAccountById.incomes.length > 0) {
+    return NextResponse.json(
+      {
+        message:
+          "Account has connected transactions. Please remove the associated transactions.",
+      },
+      { status: 409 }
     );
   }
 
