@@ -21,6 +21,7 @@ model User {
 
   accounts Account[] 
   incomes Income[]
+  expenses Expense[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,6 +34,7 @@ model Account {
   status Boolean @default(true)
 
   incomes Income[]
+  expenses Expense[]
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -44,6 +46,22 @@ model Account {
 }
 
 model Income {
+  id String @id @default(cuid())
+  date DateTime
+  description String?
+  amount Decimal
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  accountId String
+  account Account @relation(fields: [accountId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Expense {
   id String @id @default(cuid())
   date DateTime
   description String?
