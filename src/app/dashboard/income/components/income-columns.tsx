@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Income } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { Settings, SquarePen, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
