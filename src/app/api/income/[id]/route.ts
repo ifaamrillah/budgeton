@@ -60,6 +60,9 @@ export async function PATCH(
   // Check id is valid
   const getIncomeById = await db.income.findUnique({
     where: { id },
+    select: {
+      id: true,
+    },
   });
   if (!getIncomeById) {
     return NextResponse.json(
@@ -139,6 +142,9 @@ export async function DELETE(
   // Check id is valid
   const getIncomeById = await db.income.findUnique({
     where: { id },
+    select: {
+      id: true,
+    },
   });
   if (!getIncomeById) {
     return NextResponse.json(
