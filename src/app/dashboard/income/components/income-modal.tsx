@@ -14,8 +14,6 @@ import {
   updateIncomeById,
 } from "@/services/income-service";
 
-import { IncomeValidator, TypeIncomeValidator } from "@/lib/validator";
-
 import { Button } from "@/components/ui/button";
 import {
   Credenza,
@@ -31,6 +29,7 @@ import { FormCurrency } from "@/components/form/form-currency";
 import { FormDate } from "@/components/form/form-date";
 import { FormTextArea } from "@/components/form/form-textarea";
 import { FormCombobox } from "@/components/form/form-combobox";
+import { IncomeValidator, TypeIncomeValidator } from "@/lib/validator";
 
 interface IncomeModalProps {
   id?: string;
