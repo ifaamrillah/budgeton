@@ -95,16 +95,14 @@ export async function POST(req: NextRequest) {
   };
 
   // Create income
-  const create = await db.income.create({
-    data: {
-      ...transformFields(),
-    },
+  const createIncome = await db.income.create({
+    data: transformFields(),
   });
-  if (create) {
+  if (createIncome) {
     return NextResponse.json(
       {
         message: "Create income successfully.",
-        data: create,
+        data: createIncome,
       },
       { status: 201 }
     );
