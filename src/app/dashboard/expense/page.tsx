@@ -1,5 +1,7 @@
 import { PageWrapper } from "@/components/page-wrapper";
 
+import { ExpenseTable } from "./components/expense-table";
+
 const breadcrumb = [
   {
     label: "Dashboard",
@@ -17,7 +19,7 @@ const breadcrumb = [
 export default function ExpensePage() {
   return (
     <PageWrapper breadcrumb={breadcrumb} className="space-y-4">
-      Expense Table
+      <ExpenseTable />
     </PageWrapper>
   );
 }

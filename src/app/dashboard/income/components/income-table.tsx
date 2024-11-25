@@ -9,6 +9,7 @@ import { getAllIncome } from "@/services/income-service";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
+
 import { incomeColumns } from "./income-columns";
 import { IncomeModal } from "./income-modal";
 
