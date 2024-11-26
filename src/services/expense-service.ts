@@ -8,6 +8,12 @@ export async function getAllExpense(params?: Record<string, unknown>) {
   });
 }
 
+export async function getExpenseById(id?: string) {
+  return await apiGet({
+    url: `/expense/${id}`,
+  });
+}
+
 export async function createExpense(data: TypeExpenseValidator) {
   return await apiPost({
     url: "/expense",
