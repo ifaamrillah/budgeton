@@ -128,3 +128,48 @@ export async function PATCH(
     { status: 500 }
   );
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+
+  // Params
+  const id = (await params).id;
+
+  // Check id is valid
+  const getExpenseById = await db.expense.findUnique({
+    where: { id },
+    select: {
+      id: true,
+    },
+  });
+  if (!getExpenseById) {
+    return NextResponse.json(
+      { message: `Expense with id: "${id}" was not found.` },
+      { status: 404 }
+    );
+  }
+
+  // Delete expense by id
+  const deleteExpenseById = await db.expense.delete({
+    where: {
+      id,
+    },
+  });
+  if (deleteExpenseById) {
+    return NextResponse.json(
+      { message: "Delete expense successfully." },
+      { status: 200 }
+    );
+  }
+
+  // Internal server error
+  return NextResponse.json(
+    { message: "Delete expense failed." },
+    { status: 500 }
+  );
+}

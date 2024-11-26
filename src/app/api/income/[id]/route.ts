@@ -172,7 +172,7 @@ export async function DELETE(
   // Internal server error
   return NextResponse.json(
     {
-      message: "Edit income failed.",
+      message: "Delete income failed.",
     },
     { status: 500 }
   );
