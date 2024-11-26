@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/axiosClient";
+import { apiDelete, apiGet, apiPost } from "@/lib/axiosClient";
 import { TypeExpenseValidator } from "@/lib/validator";
 
 export async function getAllExpense(params?: Record<string, unknown>) {
@@ -12,5 +12,11 @@ export async function createExpense(data: TypeExpenseValidator) {
   return await apiPost({
     url: "/expense",
     data,
+  });
+}
+
+export async function deleteExpenseById(id: string) {
+  return await apiDelete({
+    url: `/expense/${id}`,
   });
 }
