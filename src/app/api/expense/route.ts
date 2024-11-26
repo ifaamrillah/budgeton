@@ -2,8 +2,64 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { ExpenseValidator } from "@/lib/validator";
+import { parseQueryParams } from "@/lib/utils";
 
 import { authorizeAndValidateUser } from "@/server/auth-server";
+
+export async function GET(req: NextRequest) {
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+  const { user } = authResult;
+
+  // Query params
+  const { pagination, sorting, filters } = parseQueryParams(
+    req.nextUrl.searchParams
+  );
+
+  // Get all expense
+  const getALlExpense = await db.expense.findMany({
+    where: {
+      userId: user.id,
+    },
+    skip: (pagination.pageIndex - 1) * pagination.pageSize,
+    take: pagination.pageSize,
+    orderBy: sorting.orderBy,
+    include: {
+      account: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  // Pagination response
+  const totalData = await db.expense.count({
+    where: {
+      userId: user.id,
+    },
+  });
+  const totalPage = Math.ceil(totalData / pagination.pageSize);
+
+  return NextResponse.json(
+    {
+      message: getALlExpense?.length
+        ? "Get all expense successfully."
+        : "No expenses found.",
+      data: getALlExpense,
+      filters,
+      pagination: {
+        ...pagination,
+        totalPage,
+        totalData,
+      },
+      sorting,
+    },
+    { status: 200 }
+  );
+}
 
 export async function POST(req: NextRequest) {
   // Check authorization
