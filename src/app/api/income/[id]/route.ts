@@ -98,13 +98,11 @@ export async function PATCH(
   };
 
   // Update income by id
-  const update = await db.income.update({
+  const updateIncomeById = await db.income.update({
     where: {
       id,
     },
-    data: {
-      ...transformFields(),
-    },
+    data: transformFields(),
     include: {
       account: {
         select: {
@@ -114,11 +112,11 @@ export async function PATCH(
       },
     },
   });
-  if (update) {
+  if (updateIncomeById) {
     return NextResponse.json(
       {
         message: "Edit income successfully.",
-        data: update,
+        data: updateIncomeById,
       },
       { status: 200 }
     );
