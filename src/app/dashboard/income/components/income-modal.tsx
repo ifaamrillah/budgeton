@@ -156,6 +156,10 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 disabled={isPendingCreateIncome || isPendingUpdateIncome}
                 fetchOptions={(search) =>
                   getAccountOptions({
+                    pagination: {
+                      pageIndex: 1,
+                      pageSize: 10,
+                    },
                     filter: {
                       name: search,
                       status: true,

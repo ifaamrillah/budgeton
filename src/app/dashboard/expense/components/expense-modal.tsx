@@ -106,6 +106,10 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
                 placeholder="Select account"
                 fetchOptions={(search) =>
                   getAccountOptions({
+                    pagination: {
+                      pageIndex: 1,
+                      pageSize: 10,
+                    },
                     filter: {
                       name: search,
                       status: true,
