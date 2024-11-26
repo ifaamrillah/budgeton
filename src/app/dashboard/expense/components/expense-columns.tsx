@@ -1,5 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Settings, SquarePen, Trash2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+
+import { deleteExpenseById } from "@/services/expense-service";
 
 import {
   ActionColumn,
@@ -15,7 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export const expenseColumns: ColumnDef<unknown>[] = [
   NoColumn({
@@ -46,31 +55,63 @@ export const expenseColumns: ColumnDef<unknown>[] = [
   ActionColumn({
     accessorKey: "actions",
     header: "Action",
-    cell: () => <ActionButton />,
+    cell: ({ row }) => <ActionButton id={row.getValue("id")} />,
   }),
 ];
 
-const ActionButton = () => {
+const ActionButton = ({ id }: { id: string }) => {
+  const queryClient = useQueryClient();
+  const [isModalDeleteOpen, setModalDeleteOpen] = useState<boolean>(false);
+
+  const { mutate: mutateDeleteExpense, isPending: isPendingDeleteExpense } =
+    useMutation({
+      mutationFn: (id: string) => deleteExpenseById(id),
+      onSuccess: () => {
+        toast.success("Delete expense successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Delete expense failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllExpense"] });
+        setModalDeleteOpen(false);
+      },
+    });
+
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="size-8 p-0">
             <span className="sr-only">Open menu</span>
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            <SquarePen className="mr-2 h-4 w-4" />
-            <span>Edit</span>
+          <DropdownMenuItem className="cursor-pointer">
+            <SquarePen className="size-4" /> Edit
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Trash2 className="mr-2 h-4 w-4" />
-            <span>Delete</span>
+          <DropdownMenuItem
+            onClick={() => setModalDeleteOpen(true)}
+            className="text-red-500 cursor-pointer"
+          >
+            <Trash2 className="size-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {isModalDeleteOpen && (
+        <ConfirmModal
+          isOpen={isModalDeleteOpen}
+          setOpen={setModalDeleteOpen}
+          isLoading={isPendingDeleteExpense}
+          title="Are you sure you want to delete it?"
+          description="This action cannot be undone. This will permanently delete your expense and remove your data from our servers."
+          confirmBtnLabel="Delete"
+          confirmBtnClassName={buttonVariants({ variant: "destructive" })}
+          onConfirm={() => mutateDeleteExpense(id)}
+        />
+      )}
     </>
   );
 };
