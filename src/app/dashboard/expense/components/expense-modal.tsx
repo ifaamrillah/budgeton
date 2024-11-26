@@ -1,8 +1,12 @@
 import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account-service";
+import { createExpense } from "@/services/expense-service";
 
 import {
   Credenza,
@@ -27,6 +31,8 @@ interface ExpenseModalProps {
 }
 
 export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
+  const queryClient = useQueryClient();
+
   const form = useForm<TypeExpenseValidator>({
     resolver: zodResolver(ExpenseValidator),
     defaultValues: {
@@ -40,8 +46,23 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
     },
   });
 
+  const { mutate: mutateCreateExpense, isPending: isPendingCreateExpense } =
+    useMutation({
+      mutationFn: (values: TypeExpenseValidator) => createExpense(values),
+      onSuccess: () => {
+        toast.success("Create expense successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Create expense failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllExpense"] });
+        setOpen(false);
+      },
+    });
+
   const onSubmit = (values: TypeExpenseValidator) => {
-    console.log(values);
+    mutateCreateExpense(values);
   };
 
   return (
@@ -56,14 +77,27 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4 my-4"
             >
-              <FormDate form={form} name="date" label="Date" required />
+              <FormDate
+                form={form}
+                name="date"
+                label="Date"
+                required
+                disabled={isPendingCreateExpense}
+              />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
-                placeholder="Enter your income details"
+                placeholder="Enter your expense details"
+                disabled={isPendingCreateExpense}
               />
-              <FormCurrency form={form} name="amount" label="Amount" required />
+              <FormCurrency
+                form={form}
+                name="amount"
+                label="Amount"
+                required
+                disabled={isPendingCreateExpense}
+              />
               <FormCombobox
                 form={form}
                 name="account"
@@ -78,15 +112,23 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
                     },
                   })
                 }
+                disabled={isPendingCreateExpense}
               />
             </form>
           </Form>
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={isPendingCreateExpense}>
+              Cancel
+            </Button>
           </CredenzaClose>
-          <Button onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+          <Button
+            onClick={() => form.handleSubmit(onSubmit)()}
+            disabled={isPendingCreateExpense}
+          >
+            {isPendingCreateExpense ? "Saving..." : "Save"}
+          </Button>
         </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
