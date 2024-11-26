@@ -26,6 +26,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
+import { ExpenseModal } from "./expense-modal";
+
 export const expenseColumns: ColumnDef<unknown>[] = [
   NoColumn({
     accessorKey: "id",
@@ -61,6 +63,7 @@ export const expenseColumns: ColumnDef<unknown>[] = [
 
 const ActionButton = ({ id }: { id: string }) => {
   const queryClient = useQueryClient();
+  const [isModalEditOpen, setModalEditOpen] = useState<boolean>(false);
   const [isModalDeleteOpen, setModalDeleteOpen] = useState<boolean>(false);
 
   const { mutate: mutateDeleteExpense, isPending: isPendingDeleteExpense } =
@@ -88,7 +91,10 @@ const ActionButton = ({ id }: { id: string }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => setModalEditOpen(true)}
+            className="cursor-pointer"
+          >
             <SquarePen className="size-4" /> Edit
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -99,6 +105,14 @@ const ActionButton = ({ id }: { id: string }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {isModalEditOpen && (
+        <ExpenseModal
+          id={id}
+          isOpen={isModalEditOpen}
+          setOpen={setModalEditOpen}
+        />
+      )}
 
       {isModalDeleteOpen && (
         <ConfirmModal

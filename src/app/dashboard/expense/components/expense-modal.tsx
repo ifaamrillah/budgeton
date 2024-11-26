@@ -1,12 +1,16 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account-service";
-import { createExpense } from "@/services/expense-service";
+import {
+  createExpense,
+  getExpenseById,
+  updateExpenseById,
+} from "@/services/expense-service";
 
 import {
   Credenza,
@@ -26,11 +30,12 @@ import { FormCombobox } from "@/components/form/form-combobox";
 import { ExpenseValidator, TypeExpenseValidator } from "@/lib/validator";
 
 interface ExpenseModalProps {
+  id?: string;
   isOpen: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
+export const ExpenseModal = ({ id, isOpen, setOpen }: ExpenseModalProps) => {
   const queryClient = useQueryClient();
 
   const form = useForm<TypeExpenseValidator>({
@@ -44,6 +49,12 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
         label: "",
       },
     },
+  });
+
+  const { data, isSuccess } = useQuery({
+    queryKey: ["getExpenseById", id],
+    queryFn: () => getExpenseById(id),
+    enabled: !!id,
   });
 
   const { mutate: mutateCreateExpense, isPending: isPendingCreateExpense } =
@@ -61,15 +72,51 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
       },
     });
 
+  const { mutate: mutateUpdateExpense, isPending: isPendingUpdateExpense } =
+    useMutation({
+      mutationFn: (values: TypeExpenseValidator) =>
+        updateExpenseById(id as string, values),
+      onSuccess: () => {
+        toast.success("Edit expense successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Edit expense failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllExpense"] });
+        setOpen(false);
+      },
+    });
+
+  useEffect(() => {
+    if (id && data?.data) {
+      form.reset({
+        date: new Date(data?.data?.date),
+        description: data?.data?.description,
+        amount: +data?.data?.amount,
+        account: {
+          value: data?.data?.account?.id,
+          label: data?.data?.account?.name,
+        },
+      });
+    }
+  }, [id, data, form]);
+
   const onSubmit = (values: TypeExpenseValidator) => {
-    mutateCreateExpense(values);
+    if (id) {
+      mutateUpdateExpense(values);
+    } else {
+      mutateCreateExpense(values);
+    }
   };
+
+  if (id && !isSuccess) return null;
 
   return (
     <Credenza open={isOpen} onOpenChange={setOpen}>
       <CredenzaContent>
         <CredenzaHeader>
-          <CredenzaTitle>Create Expense</CredenzaTitle>
+          <CredenzaTitle>{id ? "Edit" : "Add New"} Expense</CredenzaTitle>
         </CredenzaHeader>
         <CredenzaBody>
           <Form {...form}>
@@ -82,21 +129,21 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
                 name="date"
                 label="Date"
                 required
-                disabled={isPendingCreateExpense}
+                disabled={isPendingCreateExpense || isPendingUpdateExpense}
               />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
                 placeholder="Enter your expense details"
-                disabled={isPendingCreateExpense}
+                disabled={isPendingCreateExpense || isPendingUpdateExpense}
               />
               <FormCurrency
                 form={form}
                 name="amount"
                 label="Amount"
                 required
-                disabled={isPendingCreateExpense}
+                disabled={isPendingCreateExpense || isPendingUpdateExpense}
               />
               <FormCombobox
                 form={form}
@@ -116,22 +163,27 @@ export const ExpenseModal = ({ isOpen, setOpen }: ExpenseModalProps) => {
                     },
                   })
                 }
-                disabled={isPendingCreateExpense}
+                disabled={isPendingCreateExpense || isPendingUpdateExpense}
               />
             </form>
           </Form>
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline" disabled={isPendingCreateExpense}>
+            <Button
+              variant="outline"
+              disabled={isPendingCreateExpense || isPendingUpdateExpense}
+            >
               Cancel
             </Button>
           </CredenzaClose>
           <Button
             onClick={() => form.handleSubmit(onSubmit)()}
-            disabled={isPendingCreateExpense}
+            disabled={isPendingCreateExpense || isPendingUpdateExpense}
           >
-            {isPendingCreateExpense ? "Saving..." : "Save"}
+            {isPendingCreateExpense || isPendingUpdateExpense
+              ? "Saving..."
+              : "Save"}
           </Button>
         </CredenzaFooter>
       </CredenzaContent>
