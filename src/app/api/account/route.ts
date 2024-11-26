@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
     orderBy: sorting.orderBy,
     include: {
       incomes: { select: { amount: true } },
+      expenses: { select: { amount: true } },
     },
   });
 

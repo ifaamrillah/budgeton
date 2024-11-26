@@ -3,6 +3,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 
 interface CalculateAccountBalancesProps extends Account {
   incomes: { amount: Decimal }[];
+  expenses: { amount: Decimal }[];
 }
 
 export function calculateAccountBalances(
@@ -14,7 +15,14 @@ export function calculateAccountBalances(
       return acc.plus(incomeAmount);
     }, new Decimal(0));
 
-    const balance = new Decimal(account.startingBalance).plus(totalIncome);
+    const totalExpense = account.expenses.reduce((acc, expense) => {
+      const expenseAmount = new Decimal(expense.amount);
+      return acc.plus(expenseAmount);
+    }, new Decimal(0));
+
+    const balance = new Decimal(account.startingBalance)
+      .plus(totalIncome)
+      .minus(totalExpense);
 
     return {
       ...account,
