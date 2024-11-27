@@ -39,3 +39,32 @@ export const ExpenseValidator = z.object({
 });
 
 export type TypeExpenseValidator = z.infer<typeof ExpenseValidator>;
+
+export const TransferValidator = z
+  .object({
+    date: z.date({ message: "Date is required" }),
+    description: z.string().optional(),
+    amountOut: z
+      .number({ message: "Amount Out must be a number" })
+      .min(0, { message: "Amount Out must not be minus" }),
+    amountIn: z
+      .number({ message: "Amount In must be a number" })
+      .min(0, { message: "Amount In must not be minus" }),
+    fromAccount: z.object({
+      value: z.string({ message: "From Account is required" }),
+      label: z.string({ message: "From Account is required" }),
+    }),
+    toAccount: z.object({
+      value: z.string({ message: "To Account is required" }),
+      label: z.string({ message: "To Account is required" }),
+    }),
+    fee: z
+      .number({ message: "Amount In must be a number" })
+      .min(0, { message: "Amount In must not be minus" }),
+  })
+  .refine((data) => data.amountOut >= data.amountIn, {
+    message: "Amount In cannot be greater than Amount Out",
+    path: ["amountIn"],
+  });
+
+export type TypeTransferValidator = z.infer<typeof TransferValidator>;
