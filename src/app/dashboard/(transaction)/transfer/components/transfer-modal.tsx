@@ -3,8 +3,12 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account-service";
+import { createTransfer } from "@/services/transfer-service";
 
 import {
   Credenza,
@@ -30,6 +34,8 @@ interface TransferModalProps {
 }
 
 export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
+  const queryClient = useQueryClient();
+
   const form = useForm<TypeTransferValidator>({
     resolver: zodResolver(TransferValidator),
     defaultValues: {
@@ -58,8 +64,23 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
     form.setValue("fee", calculatedFee);
   }, [amountOut, amountIn, form]);
 
+  const { mutate: mutateCreateTransfer, isPending: isPendingCreateTransfer } =
+    useMutation({
+      mutationFn: (values: TypeTransferValidator) => createTransfer(values),
+      onSuccess: () => {
+        toast.success("Create transfer successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Create transfer failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllTransfer"] });
+        setOpen(false);
+      },
+    });
+
   const onSubmit = (values: TypeTransferValidator) => {
-    console.log(values);
+    mutateCreateTransfer(values);
   };
 
   return (
@@ -74,12 +95,19 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4 my-4"
             >
-              <FormDate form={form} name="date" label="Date" required />
+              <FormDate
+                form={form}
+                name="date"
+                label="Date"
+                required
+                disabled={isPendingCreateTransfer}
+              />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
                 placeholder="Enter your transfer details"
+                disabled={isPendingCreateTransfer}
               />
               <FormCombobox
                 form={form}
@@ -99,12 +127,14 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
                     },
                   })
                 }
+                disabled={isPendingCreateTransfer}
               />
               <FormCurrency
                 form={form}
                 name="amountOut"
                 label="Amount Out"
                 required
+                disabled={isPendingCreateTransfer}
               />
               <FormCombobox
                 form={form}
@@ -124,22 +154,37 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
                     },
                   })
                 }
+                disabled={isPendingCreateTransfer}
               />
               <FormCurrency
                 form={form}
                 name="amountIn"
                 label="Amount In"
                 required
+                disabled={isPendingCreateTransfer}
               />
-              <FormCurrency form={form} name="fee" label="Fee" disabled />
+              <FormCurrency
+                form={form}
+                name="fee"
+                label="Fee"
+                required
+                disabled
+              />
             </form>
           </Form>
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={isPendingCreateTransfer}>
+              Cancel
+            </Button>
           </CredenzaClose>
-          <Button onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+          <Button
+            onClick={() => form.handleSubmit(onSubmit)()}
+            disabled={isPendingCreateTransfer}
+          >
+            {isPendingCreateTransfer ? "Saving..." : "Save"}
+          </Button>
         </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
