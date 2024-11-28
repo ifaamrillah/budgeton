@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { AccountValidator } from "@/lib/validator";
 
 import { authorizeAndValidateUser } from "@/server/auth-server";
+import { calculateAccountBalance } from "@/server/account-server";
 
 export async function GET(
   req: NextRequest,
@@ -21,6 +22,12 @@ export async function GET(
     where: {
       id,
     },
+    include: {
+      incomes: { select: { amount: true } },
+      expenses: { select: { amount: true } },
+      outgoingTransfers: { select: { amountOut: true } },
+      incomingTransfers: { select: { amountIn: true } },
+    },
   });
   if (!getAccountById) {
     return NextResponse.json(
@@ -29,10 +36,12 @@ export async function GET(
     );
   }
 
+  const accountWithBalance = calculateAccountBalance(getAccountById);
+
   return NextResponse.json(
     {
       message: `Get account with id: "${id}" successfully.`,
-      data: getAccountById,
+      data: accountWithBalance,
     },
     { status: 200 }
   );

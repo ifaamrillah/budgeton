@@ -42,6 +42,8 @@ export async function GET(req: NextRequest) {
     include: {
       incomes: { select: { amount: true } },
       expenses: { select: { amount: true } },
+      outgoingTransfers: { select: { amountOut: true } },
+      incomingTransfers: { select: { amountIn: true } },
     },
   });
 
