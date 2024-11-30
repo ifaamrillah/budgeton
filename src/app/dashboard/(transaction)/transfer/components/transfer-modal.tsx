@@ -3,12 +3,16 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account-service";
-import { createTransfer } from "@/services/transfer-service";
+import {
+  createTransfer,
+  getTransferById,
+  updateTransferById,
+} from "@/services/transfer-service";
 
 import {
   Credenza,
@@ -33,7 +37,7 @@ interface TransferModalProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
+export const TransferModal = ({ id, isOpen, setOpen }: TransferModalProps) => {
   const queryClient = useQueryClient();
 
   const form = useForm<TypeTransferValidator>({
@@ -41,8 +45,8 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
     defaultValues: {
       date: new Date(),
       description: "",
-      amountIn: 0,
       amountOut: 0,
+      amountIn: 0,
       fromAccount: {
         value: "",
         label: "",
@@ -55,14 +59,11 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
     },
   });
 
-  const amountOut = form.watch("amountOut");
-  const amountIn = form.watch("amountIn");
-
-  // Calculate and set fee
-  useEffect(() => {
-    const calculatedFee = amountOut - amountIn;
-    form.setValue("fee", calculatedFee);
-  }, [amountOut, amountIn, form]);
+  const { data, isSuccess } = useQuery({
+    queryKey: ["getTransferById", id],
+    queryFn: () => getTransferById(id),
+    enabled: !!id,
+  });
 
   const { mutate: mutateCreateTransfer, isPending: isPendingCreateTransfer } =
     useMutation({
@@ -79,15 +80,66 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
       },
     });
 
+  const { mutate: mutateUpdateTransfer, isPending: isPendingUpdateTransfer } =
+    useMutation({
+      mutationFn: (values: TypeTransferValidator) =>
+        updateTransferById(id as string, values),
+      onSuccess: () => {
+        toast.success("Edit transfer successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Edit transfer failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllTransfer"] });
+        setOpen(false);
+      },
+    });
+
+  const amountOut = form.watch("amountOut");
+  const amountIn = form.watch("amountIn");
+
+  // Calculate and set fee
+  useEffect(() => {
+    const calculatedFee = amountOut - amountIn;
+    form.setValue("fee", calculatedFee);
+  }, [amountOut, amountIn, form]);
+
+  useEffect(() => {
+    if (id && data?.data) {
+      form.reset({
+        date: new Date(data?.data?.date),
+        description: data?.data?.description,
+        amountOut: +data?.data?.amountOut,
+        amountIn: +data?.data?.amountIn,
+        fromAccount: {
+          value: data?.data?.fromAccount?.id,
+          label: data?.data?.fromAccount?.name,
+        },
+        toAccount: {
+          value: data?.data?.toAccount?.id,
+          label: data?.data?.toAccount?.name,
+        },
+        fee: data?.data?.fee,
+      });
+    }
+  }, [id, data, form]);
+
   const onSubmit = (values: TypeTransferValidator) => {
-    mutateCreateTransfer(values);
+    if (id) {
+      mutateUpdateTransfer(values);
+    } else {
+      mutateCreateTransfer(values);
+    }
   };
+
+  if (id && !isSuccess) return null;
 
   return (
     <Credenza open={isOpen} onOpenChange={setOpen}>
       <CredenzaContent>
         <CredenzaHeader>
-          <CredenzaTitle>Add New Transfer</CredenzaTitle>
+          <CredenzaTitle>{id ? "Edit" : "Add New"} Transfer</CredenzaTitle>
         </CredenzaHeader>
         <CredenzaBody>
           <Form {...form}>
@@ -100,14 +152,14 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
                 name="date"
                 label="Date"
                 required
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormTextArea
                 form={form}
                 name="description"
                 label="Description"
                 placeholder="Enter your transfer details"
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormCombobox
                 form={form}
@@ -127,14 +179,14 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
                     },
                   })
                 }
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormCurrency
                 form={form}
                 name="amountOut"
                 label="Amount Out"
                 required
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormCombobox
                 form={form}
@@ -154,14 +206,14 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
                     },
                   })
                 }
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormCurrency
                 form={form}
                 name="amountIn"
                 label="Amount In"
                 required
-                disabled={isPendingCreateTransfer}
+                disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
               />
               <FormCurrency
                 form={form}
@@ -175,15 +227,20 @@ export const TransferModal = ({ isOpen, setOpen }: TransferModalProps) => {
         </CredenzaBody>
         <CredenzaFooter>
           <CredenzaClose asChild>
-            <Button variant="outline" disabled={isPendingCreateTransfer}>
+            <Button
+              variant="outline"
+              disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
+            >
               Cancel
             </Button>
           </CredenzaClose>
           <Button
             onClick={() => form.handleSubmit(onSubmit)()}
-            disabled={isPendingCreateTransfer}
+            disabled={isPendingCreateTransfer || isPendingUpdateTransfer}
           >
-            {isPendingCreateTransfer ? "Saving..." : "Save"}
+            {isPendingCreateTransfer || isPendingUpdateTransfer
+              ? "Saving..."
+              : "Save"}
           </Button>
         </CredenzaFooter>
       </CredenzaContent>
