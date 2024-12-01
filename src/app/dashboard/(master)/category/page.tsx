@@ -1,7 +1,5 @@
 import { PageWrapper } from "@/components/page-wrapper";
 
-import { AccountTable } from "./components/account-table";
-
 const breadcrumb = [
   {
     label: "Dashboard",
@@ -11,15 +9,15 @@ const breadcrumb = [
     label: "Master",
   },
   {
-    label: "Account",
-    href: "/account",
+    label: "Category",
+    href: "/category",
   },
 ];
 
-export default function AccountPage() {
+export default function CategoryPage() {
   return (
     <PageWrapper breadcrumb={breadcrumb} className="space-y-4">
-      <AccountTable />
+      Category Page
     </PageWrapper>
   );
 }
