@@ -1,5 +1,7 @@
 import { PageWrapper } from "@/components/page-wrapper";
 
+import { CategoryTable } from "./components/category-table";
+
 const breadcrumb = [
   {
     label: "Dashboard",
@@ -17,7 +19,7 @@ const breadcrumb = [
 export default function CategoryPage() {
   return (
     <PageWrapper breadcrumb={breadcrumb} className="space-y-4">
-      Category Page
+      <CategoryTable />
     </PageWrapper>
   );
 }
