@@ -7,22 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Plan {
+enum PlanType {
   FREE
   PRO
   LIFETIME
 }
 
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
 model User {
   id String @id @default(cuid())
   email String @unique
-  plan Plan @default(FREE)
+  plan PlanType @default(FREE)
   expiredPlan DateTime?
 
   accounts Account[] 
   incomes Income[]
   expenses Expense[]
   transfers Transfer[]
+  categories Category[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,12 +42,11 @@ model Account {
 
   incomes Income[]
   expenses Expense[]
+  outgoingTransfers Transfer[] @relation("TransferFromAccount")
+  incomingTransfers Transfer[] @relation("TransferToAccount")
 
   userId String
   user User @relation(fields: [userId], references: [id])
-
-  outgoingTransfers Transfer[] @relation("TransferFromAccount")
-  incomingTransfers Transfer[] @relation("TransferToAccount")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,11 +60,14 @@ model Income {
   description String?
   amount Decimal
 
-  userId String
-  user User @relation(fields: [userId], references: [id])
-
   accountId String
   account Account @relation(fields: [accountId], references: [id])
+
+  categoryId String?
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -71,11 +79,14 @@ model Expense {
   description String?
   amount Decimal
 
-  userId String
-  user User @relation(fields: [userId], references: [id])
-
   accountId String
   account Account @relation(fields: [accountId], references: [id])
+
+  categoryId String? 
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,4 +112,21 @@ model Transfer {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(cuid())
+  name String
+  type CategoryType
+
+  incomes Income[]
+  expenses Expense[]
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
 }
