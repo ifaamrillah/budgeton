@@ -25,17 +25,19 @@ export async function GET(req: NextRequest) {
       ? false
       : undefined;
 
+  const filterWhereClause = {
+    userId: user.id,
+    ...(filterName && {
+      name: { contains: filterName, mode: "insensitive" },
+    }),
+    ...(filterStatus !== undefined && {
+      status: filterStatus,
+    }),
+  };
+
   // Get all account
   const getAllAccount = await db.account.findMany({
-    where: {
-      userId: user.id,
-      ...(filterName && {
-        name: { contains: filterName, mode: "insensitive" },
-      }),
-      ...(filterStatus !== undefined && {
-        status: filterStatus,
-      }),
-    },
+    where: filterWhereClause,
     skip: (pagination.pageIndex - 1) * pagination.pageSize,
     take: pagination.pageSize,
     orderBy: sorting.orderBy,
@@ -52,15 +54,7 @@ export async function GET(req: NextRequest) {
 
   // Pagination response
   const totalData = await db.account.count({
-    where: {
-      userId: user.id,
-      ...(filterName && {
-        name: { contains: filterName, mode: "insensitive" },
-      }),
-      ...(filterStatus !== undefined && {
-        status: filterStatus,
-      }),
-    },
+    where: filterWhereClause,
   });
   const totalPage = Math.ceil(totalData / pagination.pageSize);
 
