@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Settings, SquarePen, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+
+import { deleteCategoryById } from "@/services/category-service";
 
 import {
   ActionColumn,
@@ -17,7 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 import { CategoryModal } from "./category-modal";
 
@@ -58,7 +64,24 @@ export const categoryColumns: ColumnDef<unknown>[] = [
 ];
 
 const ActionButton = ({ id }: { id: string }) => {
+  const queryClient = useQueryClient();
   const [isModalEditOpen, setModalEditOpen] = useState<boolean>(false);
+  const [isModalDeleteOpen, setModalDeleteOpen] = useState<boolean>(false);
+
+  const { mutate: mutateDeleteCategory, isPending: isPendingDeleteCategory } =
+    useMutation({
+      mutationFn: (id: string) => deleteCategoryById(id),
+      onSuccess: () => {
+        toast.success("Delete category successfully.");
+      },
+      onError: (err: AxiosError<{ message: string }>) => {
+        toast.error(err?.response?.data?.message || "Delete category failed.");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["getAllCategory"] });
+        setModalDeleteOpen(false);
+      },
+    });
 
   return (
     <>
@@ -76,7 +99,10 @@ const ActionButton = ({ id }: { id: string }) => {
           >
             <SquarePen className="size-4" /> Edit
           </DropdownMenuItem>
-          <DropdownMenuItem className="text-red-500 cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => setModalDeleteOpen(true)}
+            className="text-red-500 cursor-pointer"
+          >
             <Trash2 className="size-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -87,6 +113,19 @@ const ActionButton = ({ id }: { id: string }) => {
           id={id}
           isOpen={isModalEditOpen}
           setOpen={setModalEditOpen}
+        />
+      )}
+
+      {isModalDeleteOpen && (
+        <ConfirmModal
+          isOpen={isModalDeleteOpen}
+          setOpen={setModalDeleteOpen}
+          isLoading={isPendingDeleteCategory}
+          title="Are you sure you want to delete it?"
+          description="This action cannot be undone. This will permanently delete your category and remove your data from our servers."
+          confirmBtnLabel="Delete"
+          confirmBtnClassName={buttonVariants({ variant: "destructive" })}
+          onConfirm={() => mutateDeleteCategory(id)}
         />
       )}
     </>
