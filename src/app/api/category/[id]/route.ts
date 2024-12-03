@@ -123,3 +123,71 @@ export async function PATCH(
     { status: 500 }
   );
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+
+  // Params
+  const id = (await params).id;
+
+  // Check id is valid
+  const getCategoryById = await db.category.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      incomes: {
+        select: {
+          id: true,
+        },
+      },
+      expenses: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+  if (!getCategoryById) {
+    return NextResponse.json(
+      { message: `Category with id: "${id}" was not found.` },
+      { status: 404 }
+    );
+  }
+
+  const hasRelations =
+    getCategoryById.incomes.length > 0 || getCategoryById.expenses.length > 0;
+
+  if (hasRelations) {
+    return NextResponse.json(
+      {
+        message:
+          "Category has connected transactions. Please remove the associated transactions.",
+      },
+      { status: 409 }
+    );
+  }
+
+  // Delete category by id
+  const deleteCategoryById = await db.category.delete({
+    where: {
+      id,
+    },
+  });
+  if (deleteCategoryById) {
+    return NextResponse.json(
+      { message: "Delete category successfully." },
+      { status: 200 }
+    );
+  }
+
+  // Internal server error
+  return NextResponse.json(
+    { message: "Delete category failed." },
+    { status: 500 }
+  );
+}
