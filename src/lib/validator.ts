@@ -68,3 +68,12 @@ export const TransferValidator = z
   });
 
 export type TypeTransferValidator = z.infer<typeof TransferValidator>;
+
+export const CategoryValidator = z.object({
+  name: z.string().min(1, {
+    message: "Name is required",
+  }),
+  type: z.enum(["INCOME", "EXPENSE"]).default("INCOME"),
+});
+
+export type TypeCategoryValidator = z.infer<typeof CategoryValidator>;
