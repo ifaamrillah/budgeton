@@ -2,8 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { CategoryValidator } from "@/lib/validator";
+import { parseQueryParams } from "@/lib/utils";
 
 import { authorizeAndValidateUser } from "@/server/auth-server";
+
+export async function GET(req: NextRequest) {
+  // Check authorization
+  const authResult = await authorizeAndValidateUser();
+  if ("status" in authResult) return authResult;
+  const { user } = authResult;
+
+  // Query params
+  const { pagination, sorting, filters } = parseQueryParams(
+    req.nextUrl.searchParams
+  );
+  const filterName = filters?.name || undefined;
+
+  const filterWhereClause = {
+    userId: user.id,
+    ...(filterName && {
+      name: { contains: filterName, mode: "insensitive" },
+    }),
+  };
+
+  // Get all category
+  const getAllCategory = await db.category.findMany({
+    where: filterWhereClause,
+    skip: (pagination.pageIndex - 1) * pagination.pageSize,
+    take: pagination.pageSize,
+    orderBy: sorting.orderBy,
+  });
+
+  // Pagination response
+  const totalData = await db.category.count({
+    where: filterWhereClause,
+  });
+  const totalPage = Math.ceil(totalData / pagination.pageSize);
+
+  return NextResponse.json(
+    {
+      message: getAllCategory.length
+        ? "Get all category successfully."
+        : "No categories found",
+      data: getAllCategory,
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        totalPage: totalPage,
+        totalData: totalData,
+      },
+      sorting,
+    },
+    { status: 200 }
+  );
+}
 
 export async function POST(req: NextRequest) {
   // Check authorization
@@ -27,7 +79,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  //   Check name is unique
+  // Check name is unique
   const existingCategoryName = await db.category.findUnique({
     where: {
       userId_name: {
