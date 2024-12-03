@@ -114,9 +114,7 @@ export async function PATCH(
     where: {
       id,
     },
-    data: {
-      ...validatedFields.data,
-    },
+    data: validatedFields.data,
   });
   if (updateAccountById) {
     return NextResponse.json(
