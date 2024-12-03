@@ -14,3 +14,9 @@ export async function createCategory(data: TypeCategoryValidator) {
     data,
   });
 }
+
+export async function getCategoryById(id?: string) {
+  return await apiGet({
+    url: `/category/${id}`,
+  });
+}
