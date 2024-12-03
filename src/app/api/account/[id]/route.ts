@@ -154,6 +154,21 @@ export async function DELETE(
           id: true,
         },
       },
+      expenses: {
+        select: {
+          id: true,
+        },
+      },
+      incomingTransfers: {
+        select: {
+          id: true,
+        },
+      },
+      outgoingTransfers: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
   if (!getAccountById) {
@@ -166,7 +181,14 @@ export async function DELETE(
   }
 
   // Check account has relations.
-  if (getAccountById.incomes.length > 0) {
+
+  const hasRelations =
+    getAccountById.incomes.length > 0 ||
+    getAccountById.expenses.length > 0 ||
+    getAccountById.incomingTransfers.length > 0 ||
+    getAccountById.outgoingTransfers.length > 0;
+
+  if (hasRelations) {
     return NextResponse.json(
       {
         message:
