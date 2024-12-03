@@ -117,7 +117,7 @@ model Transfer {
 model Category {
   id String @id @default(cuid())
   name String
-  type CategoryType
+  type CategoryType @default(INCOME)
 
   incomes Income[]
   expenses Expense[]
