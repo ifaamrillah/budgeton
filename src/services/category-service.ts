@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
 import { TypeCategoryValidator } from "@/lib/validator";
 
 export async function getAllCategory(params?: Record<string, unknown>) {
@@ -28,5 +28,11 @@ export async function updateCategoryById(
   return await apiPatch({
     url: `/category/${id}`,
     data,
+  });
+}
+
+export async function deleteCategoryById(id: string) {
+  return await apiDelete({
+    url: `/category/${id}`,
   });
 }
