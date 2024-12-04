@@ -186,6 +186,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                     },
                   })
                 }
+                allowClear
               />
             </form>
           </Form>
