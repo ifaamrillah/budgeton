@@ -32,6 +32,12 @@ export async function GET(req: NextRequest) {
           name: true,
         },
       },
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -85,11 +91,12 @@ export async function POST(req: NextRequest) {
   }
 
   const transformFields = () => {
-    const { account, ...newData } = validatedFields.data;
+    const { account, category, ...newData } = validatedFields.data;
 
     return {
       ...newData,
       accountId: account.value,
+      categoryId: category?.value,
       userId: user.id,
     };
   };

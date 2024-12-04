@@ -28,6 +28,12 @@ export async function GET(
           name: true,
         },
       },
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
   if (!getIncomeById) {
@@ -89,11 +95,12 @@ export async function PATCH(
   }
 
   const transformFields = () => {
-    const { account, ...newData } = validatedFields.data;
+    const { account, category, ...newData } = validatedFields.data;
 
     return {
       ...newData,
       accountId: account.value,
+      categoryId: category?.value,
     };
   };
 
@@ -105,6 +112,12 @@ export async function PATCH(
     data: transformFields(),
     include: {
       account: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      category: {
         select: {
           id: true,
           name: true,
