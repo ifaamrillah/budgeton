@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 
 import { getAccountOptions } from "@/services/account-service";
+import { getCategoryOptions } from "@/services/category-service";
 import {
   createIncome,
   getIncomeById,
@@ -46,10 +47,6 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
       date: new Date(),
       description: "",
       amount: 0,
-      account: {
-        value: "",
-        label: "",
-      },
     },
   });
 
@@ -96,6 +93,10 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
         date: new Date(data?.data?.date),
         description: data?.data?.description,
         amount: +data?.data?.amount,
+        category: {
+          value: data?.data?.category?.id,
+          label: data?.data?.category?.name,
+        },
         account: {
           value: data?.data?.account?.id,
           label: data?.data?.account?.name,
@@ -156,6 +157,25 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                 disabled={isPendingCreateIncome || isPendingUpdateIncome}
                 fetchOptions={(search) =>
                   getAccountOptions({
+                    pagination: {
+                      pageIndex: 1,
+                      pageSize: 10,
+                    },
+                    filter: {
+                      name: search,
+                      status: true,
+                    },
+                  })
+                }
+              />
+              <FormCombobox
+                form={form}
+                name="category"
+                label="Category"
+                placeholder="Select category"
+                disabled={isPendingCreateIncome || isPendingUpdateIncome}
+                fetchOptions={(search) =>
+                  getCategoryOptions({
                     pagination: {
                       pageIndex: 1,
                       pageSize: 10,
