@@ -18,6 +18,12 @@ export const IncomeValidator = z.object({
   amount: z
     .number({ message: "Amount must be a number" })
     .min(0, { message: "Amount must not be minus" }),
+  category: z
+    .object({
+      value: z.string({ message: "Category is required" }),
+      label: z.string({ message: "Category is required" }),
+    })
+    .optional(),
   account: z.object({
     value: z.string({ message: "Account is required" }),
     label: z.string({ message: "Account is required" }),
