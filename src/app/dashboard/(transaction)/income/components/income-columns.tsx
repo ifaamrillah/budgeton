@@ -54,6 +54,10 @@ export const incomeColumns: ColumnDef<unknown>[] = [
     accessorKey: "account.name",
     header: "Account",
   }),
+  NameColumn({
+    accessorKey: "category.name",
+    header: "Category",
+  }),
   ActionColumn({
     accessorKey: "actions",
     header: "Action",
