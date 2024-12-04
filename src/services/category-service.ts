@@ -1,10 +1,27 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/axiosClient";
 import { TypeCategoryValidator } from "@/lib/validator";
+import { Category } from "@prisma/client";
 
 export async function getAllCategory(params?: Record<string, unknown>) {
   return await apiGet({
     url: "/category",
     params,
+  });
+}
+
+export async function getCategoryOptions(params?: Record<string, unknown>) {
+  return await apiGet({
+    url: "/category",
+    params,
+  }).then((data) => {
+    if (data?.data) {
+      const transformedData = data?.data?.map((item: Category) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      return transformedData;
+    }
+    return data;
   });
 }
 
