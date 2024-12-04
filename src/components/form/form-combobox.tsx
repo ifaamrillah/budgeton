@@ -51,7 +51,7 @@ export const FormCombobox = <T extends FieldValues>({
   const debouncedFilterName = useDebounce(filterName, 1000);
 
   const { data: options, isLoading } = useQuery({
-    queryKey: ["accountOptions", debouncedFilterName],
+    queryKey: [`${name}Options`, debouncedFilterName],
     queryFn: () => fetchOptions(debouncedFilterName),
     enabled: isOpen || debouncedFilterName.length > 0,
   });
