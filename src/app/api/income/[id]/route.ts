@@ -100,7 +100,7 @@ export async function PATCH(
     return {
       ...newData,
       accountId: account.value,
-      categoryId: category?.value,
+      categoryId: category?.value || null,
     };
   };
 
