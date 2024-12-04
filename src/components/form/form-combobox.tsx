@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FieldValues, Path, PathValue } from "react-hook-form";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -30,6 +30,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Separator } from "@/components/ui/separator";
 import { FormProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -42,8 +43,10 @@ export const FormCombobox = <T extends FieldValues>({
   disabled,
   description,
   fetchOptions,
+  allowClear,
 }: FormProps<T> & {
   fetchOptions: (search: string) => Promise<PathValue<T, Path<T>>>;
+  allowClear?: boolean;
 }) => {
   const [isOpen, setOpen] = useState<boolean>(false);
   const [filterName, setFilterName] = useState<string>("");
@@ -120,6 +123,23 @@ export const FormCombobox = <T extends FieldValues>({
                         </CommandItem>
                       ))}
                     </CommandGroup>
+                    {allowClear && (
+                      <>
+                        <Separator />
+                        <Button
+                          variant="ghost"
+                          className="w-full rounded-t-none text-red-500 hover:text-red-500 hover:bg-red-50"
+                          onClick={() => {
+                            form.setValue(name, null as PathValue<T, Path<T>>);
+                            setFilterName("");
+                            setOpen(false);
+                          }}
+                        >
+                          <Trash2 className="size-2" />
+                          Clear Option
+                        </Button>
+                      </>
+                    )}
                   </CommandList>
                 </Command>
               </PopoverContent>
