@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   );
 
   // Get all expense
-  const getALlExpense = await db.expense.findMany({
+  const getAllExpense = await db.expense.findMany({
     where: {
       userId: user.id,
     },
@@ -27,6 +27,12 @@ export async function GET(req: NextRequest) {
     orderBy: sorting.orderBy,
     include: {
       account: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      category: {
         select: {
           id: true,
           name: true,
@@ -45,10 +51,10 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(
     {
-      message: getALlExpense?.length
+      message: getAllExpense?.length
         ? "Get all expense successfully."
         : "No expenses found.",
-      data: getALlExpense,
+      data: getAllExpense,
       filters,
       pagination: {
         ...pagination,
@@ -85,11 +91,12 @@ export async function POST(req: NextRequest) {
   }
 
   const transformFields = () => {
-    const { account, ...newData } = validatedFields.data;
+    const { account, category, ...newData } = validatedFields.data;
 
     return {
       ...newData,
       accountId: account.value,
+      categoryId: category?.value || null,
       userId: user.id,
     };
   };
@@ -104,7 +111,7 @@ export async function POST(req: NextRequest) {
         message: "Create expense successfully.",
         data: createExpense,
       },
-      { status: 200 }
+      { status: 201 }
     );
   }
 

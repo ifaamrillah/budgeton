@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     return {
       ...newData,
       accountId: account.value,
-      categoryId: category?.value,
+      categoryId: category?.value || null,
       userId: user.id,
     };
   };
