@@ -18,6 +18,10 @@ export const IncomeValidator = z.object({
   amount: z
     .number({ message: "Amount must be a number" })
     .min(0, { message: "Amount must not be minus" }),
+  account: z.object({
+    value: z.string({ message: "Account is required" }),
+    label: z.string({ message: "Account is required" }),
+  }),
   category: z
     .union([
       z.object({
@@ -27,10 +31,6 @@ export const IncomeValidator = z.object({
       z.null(),
     ])
     .optional(),
-  account: z.object({
-    value: z.string({ message: "Account is required" }),
-    label: z.string({ message: "Account is required" }),
-  }),
 });
 
 export type TypeIncomeValidator = z.infer<typeof IncomeValidator>;
@@ -45,6 +45,15 @@ export const ExpenseValidator = z.object({
     value: z.string({ message: "Account is required" }),
     label: z.string({ message: "Account is required" }),
   }),
+  category: z
+    .union([
+      z.object({
+        value: z.string({ message: "Category is required" }),
+        label: z.string({ message: "Category is required" }),
+      }),
+      z.null(),
+    ])
+    .optional(),
 });
 
 export type TypeExpenseValidator = z.infer<typeof ExpenseValidator>;
