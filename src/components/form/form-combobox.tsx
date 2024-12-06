@@ -81,9 +81,9 @@ export const FormCombobox = <T extends FieldValues>({
                   >
                     {filterName?.length > 0
                       ? options?.find(
-                          (option: any) => option.value === field.value.value
+                          (option: any) => option.value === field.value?.value
                         )?.label ||
-                        field.value.label ||
+                        field.value?.label ||
                         placeholder
                       : field.value?.label || placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
