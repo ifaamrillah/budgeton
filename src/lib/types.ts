@@ -8,4 +8,5 @@ export type FormProps<T extends FieldValues> = {
   placeholder?: string;
   disabled?: boolean;
   description?: string;
+  className?: string;
 };
