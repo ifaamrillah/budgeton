@@ -53,7 +53,7 @@ export const FormCombobox = <T extends FieldValues>({
 
   const debouncedFilterName = useDebounce(filterName, 1000);
 
-  const { data: options, isLoading } = useQuery({
+  const { data: options, isFetching } = useQuery({
     queryKey: [`${name}Options`, debouncedFilterName],
     queryFn: () => fetchOptions(debouncedFilterName),
     enabled: isOpen || debouncedFilterName.length > 0,
@@ -98,32 +98,35 @@ export const FormCombobox = <T extends FieldValues>({
                     onValueChange={setFilterName}
                   />
                   <CommandList>
-                    <CommandEmpty>
-                      {isLoading ? "Searching..." : "No option found."}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {options?.map((option: any) => (
-                        <CommandItem
-                          value={option.label}
-                          key={option.value}
-                          onSelect={() => {
-                            form.setValue(name, option);
-                            setOpen(false);
-                          }}
-                        >
-                          {option.label}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              option.value === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                    {allowClear && (
+                    {isFetching ? (
+                      <CommandEmpty>Loading...</CommandEmpty>
+                    ) : options?.length === 0 ? (
+                      <CommandEmpty>No options found.</CommandEmpty>
+                    ) : (
+                      <CommandGroup>
+                        {options?.map((option: any) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              form.setValue(name, option);
+                              setOpen(false);
+                            }}
+                          >
+                            {option.label}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                option.value === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+                    {allowClear && options?.length > 0 && !isFetching && (
                       <>
                         <Separator />
                         <Button
