@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { CategoryType } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { CategoryValidator } from "@/lib/validator";
@@ -17,11 +18,15 @@ export async function GET(req: NextRequest) {
     req.nextUrl.searchParams
   );
   const filterName = filters?.name || undefined;
+  const filterType = filters?.type || undefined;
 
   const filterWhereClause = {
     userId: user.id,
     ...(filterName && {
       name: { contains: filterName, mode: "insensitive" },
+    }),
+    ...(filterType && {
+      type: filterType as CategoryType,
     }),
   };
 
@@ -45,6 +50,7 @@ export async function GET(req: NextRequest) {
         ? "Get all category successfully."
         : "No categories found",
       data: getAllCategory,
+      filters,
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
