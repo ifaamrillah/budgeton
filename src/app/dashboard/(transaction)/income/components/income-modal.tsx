@@ -182,7 +182,7 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                     },
                     filter: {
                       name: search,
-                      status: true,
+                      type: "INCOME",
                     },
                   })
                 }

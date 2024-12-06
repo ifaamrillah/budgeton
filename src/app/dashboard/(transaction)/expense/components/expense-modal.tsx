@@ -180,7 +180,7 @@ export const ExpenseModal = ({ id, isOpen, setOpen }: ExpenseModalProps) => {
                     },
                     filter: {
                       name: search,
-                      status: true,
+                      type: "EXPENSE",
                     },
                   })
                 }
