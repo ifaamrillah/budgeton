@@ -1,11 +1,12 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { PlusCircle } from "lucide-react";
 
 import { getAccountOptions } from "@/services/account-service";
 import { getCategoryOptions } from "@/services/category-service";
@@ -32,6 +33,8 @@ import { FormTextArea } from "@/components/form/form-textarea";
 import { FormCombobox } from "@/components/form/form-combobox";
 import { IncomeValidator, TypeIncomeValidator } from "@/lib/validator";
 
+import { CategoryModal } from "@/app/dashboard/(master)/category/components/category-modal";
+
 interface IncomeModalProps {
   id?: string;
   isOpen: boolean;
@@ -40,6 +43,8 @@ interface IncomeModalProps {
 
 export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
   const queryClient = useQueryClient();
+
+  const [isOpenModal, setOpenModal] = useState<boolean>(false);
 
   const form = useForm<TypeIncomeValidator>({
     resolver: zodResolver(IncomeValidator),
@@ -168,26 +173,40 @@ export function IncomeModal({ id, isOpen, setOpen }: IncomeModalProps) {
                   })
                 }
               />
-              <FormCombobox
-                form={form}
-                name="category"
-                label="Category"
-                placeholder="Select category"
-                disabled={isPendingCreateIncome || isPendingUpdateIncome}
-                fetchOptions={(search) =>
-                  getCategoryOptions({
-                    pagination: {
-                      pageIndex: 1,
-                      pageSize: 10,
-                    },
-                    filter: {
-                      name: search,
-                      type: "INCOME",
-                    },
-                  })
-                }
-                allowClear
-              />
+              <div className="flex items-end gap-2 ">
+                <div className="flex-grow">
+                  <FormCombobox
+                    form={form}
+                    name="category"
+                    label="Category"
+                    placeholder="Select category"
+                    disabled={isPendingCreateIncome || isPendingUpdateIncome}
+                    fetchOptions={(search) =>
+                      getCategoryOptions({
+                        pagination: {
+                          pageIndex: 1,
+                          pageSize: 10,
+                        },
+                        filter: {
+                          name: search,
+                          type: "INCOME",
+                        },
+                      })
+                    }
+                    allowClear
+                  />
+                  {isOpenModal && (
+                    <CategoryModal
+                      isOpen={isOpenModal}
+                      setOpen={setOpenModal}
+                    />
+                  )}
+                </div>
+                <Button onClick={() => setOpenModal(true)}>
+                  <PlusCircle className="size-4 mr-2" />
+                  Add
+                </Button>
+              </div>
             </form>
           </Form>
         </CredenzaBody>

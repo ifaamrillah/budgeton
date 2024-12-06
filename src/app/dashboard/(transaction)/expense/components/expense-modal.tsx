@@ -1,9 +1,10 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { PlusCircle } from "lucide-react";
 
 import { getAccountOptions } from "@/services/account-service";
 import { getCategoryOptions } from "@/services/category-service";
@@ -30,6 +31,8 @@ import { FormTextArea } from "@/components/form/form-textarea";
 import { FormCombobox } from "@/components/form/form-combobox";
 import { ExpenseValidator, TypeExpenseValidator } from "@/lib/validator";
 
+import { CategoryModal } from "@/app/dashboard/(master)/category/components/category-modal";
+
 interface ExpenseModalProps {
   id?: string;
   isOpen: boolean;
@@ -38,6 +41,8 @@ interface ExpenseModalProps {
 
 export const ExpenseModal = ({ id, isOpen, setOpen }: ExpenseModalProps) => {
   const queryClient = useQueryClient();
+
+  const [isOpenModal, setOpenModal] = useState<boolean>(false);
 
   const form = useForm<TypeExpenseValidator>({
     resolver: zodResolver(ExpenseValidator),
@@ -166,26 +171,40 @@ export const ExpenseModal = ({ id, isOpen, setOpen }: ExpenseModalProps) => {
                 }
                 disabled={isPendingCreateExpense || isPendingUpdateExpense}
               />
-              <FormCombobox
-                form={form}
-                name="category"
-                label="Category"
-                placeholder="Select category"
-                disabled={isPendingCreateExpense || isPendingUpdateExpense}
-                fetchOptions={(search) =>
-                  getCategoryOptions({
-                    pagination: {
-                      pageIndex: 1,
-                      pageSize: 10,
-                    },
-                    filter: {
-                      name: search,
-                      type: "EXPENSE",
-                    },
-                  })
-                }
-                allowClear
-              />
+              <div className="flex items-end gap-2 ">
+                <div className="flex-grow">
+                  <FormCombobox
+                    form={form}
+                    name="category"
+                    label="Category"
+                    placeholder="Select category"
+                    disabled={isPendingCreateExpense || isPendingUpdateExpense}
+                    fetchOptions={(search) =>
+                      getCategoryOptions({
+                        pagination: {
+                          pageIndex: 1,
+                          pageSize: 10,
+                        },
+                        filter: {
+                          name: search,
+                          type: "EXPENSE",
+                        },
+                      })
+                    }
+                    allowClear
+                  />
+                  {isOpenModal && (
+                    <CategoryModal
+                      isOpen={isOpenModal}
+                      setOpen={setOpenModal}
+                    />
+                  )}
+                </div>
+                <Button onClick={() => setOpenModal(true)}>
+                  <PlusCircle className="size-4 mr-2" />
+                  Add
+                </Button>
+              </div>
             </form>
           </Form>
         </CredenzaBody>
